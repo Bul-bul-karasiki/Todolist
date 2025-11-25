@@ -1,0 +1,207 @@
+body {
+    display: flex;
+    justify-content: center;
+    background-color: skyblue;
+    padding-top: 50px;
+}
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+}
+
+.wrapper {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 100%;
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 0 15px;
+}
+
+.wrapper > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 400px;
+    flex-wrap: nowrap;
+}
+
+textarea#text {
+    flex: 1;
+    min-height: 38px;
+    max-height: 150px;
+    font-size: 20px;
+    padding: 8px 15px;
+    border-radius: 10px;
+    resize: none;
+    background-color: lightgray;
+    border: 3px solid black;
+    outline: none;
+    box-sizing: border-box;
+}
+
+textarea#text::-webkit-scrollbar {
+    width: 8px;
+}
+
+textarea#text::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+}
+
+textarea#text::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.3);
+    border-radius: 4px;
+}
+
+textarea#text::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.5);
+}
+
+button#btn {
+    background-color: lightgray;
+    border: 3px solid black;
+    border-radius: 10px;
+    width: 45px;
+    height: 38px;
+    font-size: 20px;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+ul#todolist {
+    width: 100%;
+    padding: 0;
+    list-style: none;
+}
+
+li {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 10px auto;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: rgba(0,0,0,0.2);
+    color: white;
+    box-shadow: -6px 0px 72px -17px rgba(0,0,0,0.23);
+    border: 1px solid rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, background-color 0.2s ease, opacity 0.3s ease;
+    text-align: center;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 30px;
+    position: relative;
+    opacity: 1;
+}
+
+li span {
+    flex: 1;
+    word-break: break-word;
+}
+
+li:hover {
+    background-color: rgba(0,0,0,0.3);
+    color: rgb(206, 204, 204);
+}
+
+li textarea.editing {
+    flex: 1;
+    font-size: 30px;
+    padding: 8px 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(0,0,0,0.3);
+    background: rgba(0,0,0,0.1);
+    color: white;
+    resize: none;
+    outline: none;
+    box-sizing: border-box;
+    margin-right: 10px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+li textarea.editing::-webkit-scrollbar {
+    width: 6px;
+}
+
+li textarea.editing::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+
+li textarea.editing::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.3);
+    border-radius: 4px;
+}
+
+li textarea.editing::-webkit-scrollbar-thumb:hover {
+    background: rgba(255,255,255,0.5);
+}
+
+li button.edit-btn,
+li button.save-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(0,0,0,0.3);
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-size: 24px;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-left: 5px;
+    transition: background 0.2s, color 0.2s;
+    color: rgba(0,0,0,0.8);
+}
+
+li button.edit-btn:hover,
+li button.save-btn:hover {
+    background: rgba(255,255,255,0.4);
+    color: rgba(0,0,0,1);
+}
+
+.dragging {
+    opacity: 0.4;
+    transform: scale(1.03);
+}
+
+/* Анімація появи справи */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Анімація видалення справи */
+@keyframes fadeOut {
+    from { opacity: 1; transform: translateX(0); }
+    to { opacity: 0; transform: translateX(100px); }
+}
+
+/* Анімація появи символів */
+@keyframes fadeInChar {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Анімація зникання символів */
+@keyframes fadeOutChar {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(-3px); }
+}
+
+#textAnimatedOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 20px;
+    white-space: pre-wrap;
+    pointer-events: none;
+    color: black;
+    padding: 8px 15px;
+    border-radius: 10px;
+    width: calc(100% - 30px);
+}
