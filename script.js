@@ -240,6 +240,20 @@ const languageManager = {
             copied: "ID копиран! 📋",
             disconnected: "Прекъсната връзка ❌",
             copyButton: "📋 Копирай"
+        },
+        nl: {
+            language: "Taal",
+            searchPlaceholder: "Talen zoeken...",
+            placeholder: "Voeg een taak toe",
+            shareToggle: "📡 Gedeelde toegang",
+            shareToggleClose: "📡 Sluit gedeelde toegang",
+            yourId: "Jouw ID:",
+            connectFriend: "Verbinden met vriend:",
+            friendIdPlaceholder: "Voer vriend's ID in",
+            connected: "Verbonden met vriend! 🎉",
+            copied: "ID gekopieerd! 📋",
+            disconnected: "Verbinding verbroken ❌",
+            copyButton: "📋 Kopiëren"
         }
     },
 
