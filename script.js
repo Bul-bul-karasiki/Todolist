@@ -1,902 +1,954 @@
-// ==================== LANGUAGE SWITCHER ====================
+// ==================== STATE MANAGEMENT ====================
+let chatsData = [];
+try {
+    const rawData = localStorage.getItem('todolist_chats');
+    if (rawData) chatsData = JSON.parse(rawData);
+    if (!Array.isArray(chatsData) || chatsData.length === 0) throw new Error("No valid chats");
+} catch (e) {
+    chatsData = [{ id: 'chat_' + Date.now(), name: 'Chat 1', todos: [] }];
+    try {
+        const oldTodos = JSON.parse(localStorage.getItem('todos'));
+        if (Array.isArray(oldTodos) && oldTodos.length > 0) chatsData[0].todos = oldTodos;
+    } catch (oldErr) {}
+    localStorage.setItem('todolist_chats', JSON.stringify(chatsData));
+}
+
+let activeChatId = localStorage.getItem('todolist_active_chat');
+if (!activeChatId || !chatsData.find(c => c.id === activeChatId)) {
+    activeChatId = chatsData[0].id;
+    localStorage.setItem('todolist_active_chat', activeChatId);
+}
+
+let draggedItem = null;
+let globalToastZIndex = 4000;
+
+// ==================== LANGUAGE & SETTINGS ====================
 const languageManager = {
     currentLang: 'uk',
-    
     translations: {
-        uk: {
-            language: "Мова",
-            searchPlaceholder: "Пошук мов...",
-            placeholder: "Додайте справу",
-            shareToggle: "📡 Спільний доступ",
-            shareToggleClose: "📡 Закрити спільний доступ",
-            yourId: "Твій ID:",
-            connectFriend: "Підключитись до друга:",
-            friendIdPlaceholder: "Введіть ID друга",
-            connected: "Підключено до друга! 🎉",
-            copied: "ID скопійовано! 📋",
-            disconnected: "Відключено ❌",
-            copyButton: "📋 Копіювати"
-        },
-        en: {
-            language: "Language",
-            searchPlaceholder: "Search languages...",
-            placeholder: "Add a task",
-            shareToggle: "📡 Shared access",
-            shareToggleClose: "📡 Close shared access",
-            yourId: "Your ID:",
-            connectFriend: "Connect to friend:",
-            friendIdPlaceholder: "Enter friend's ID",
-            connected: "Connected to friend! 🎉",
-            copied: "ID copied! 📋",
-            disconnected: "Disconnected ❌",
-            copyButton: "📋 Copy"
-        },
-        ru: {
-            language: "Язык",
-            searchPlaceholder: "Поиск языков...",
-            placeholder: "Добавьте дело",
-            shareToggle: "📡 Общий доступ",
-            shareToggleClose: "📡 Закрыть общий доступ",
-            yourId: "Твой ID:",
-            connectFriend: "Подключиться к другу:",
-            friendIdPlaceholder: "Введите ID друга",
-            connected: "Подключено к другу! 🎉",
-            copied: "ID скопирован! 📋",
-            disconnected: "Отключено ❌",
-            copyButton: "📋 Копировать"
-        },
-        pl: {
-            language: "Język",
-            searchPlaceholder: "Wyszukaj języki...",
-            placeholder: "Dodaj zadanie",
-            shareToggle: "📡 Wspólny dostęp",
-            shareToggleClose: "📡 Zamknij wspólny dostęp",
-            yourId: "Twój ID:",
-            connectFriend: "Połącz się z przyjacielem:",
-            friendIdPlaceholder: "Wpisz ID przyjaciela",
-            connected: "Połączono z przyjacielem! 🎉",
-            copied: "ID skopiowane! 📋",
-            disconnected: "Rozłączono ❌",
-            copyButton: "📋 Kopiuj"
-        },
-        de: {
-            language: "Sprache",
-            searchPlaceholder: "Sprachen suchen...",
-            placeholder: "Aufgabe hinzufügen",
-            shareToggle: "📡 Gemeinsamer Zugriff",
-            shareToggleClose: "📡 Gemeinsamen Zugriff schließen",
-            yourId: "Deine ID:",
-            connectFriend: "Mit Freund verbinden:",
-            friendIdPlaceholder: "Freundes-ID eingeben",
-            connected: "Mit Freund verbunden! 🎉",
-            copied: "ID kopiert! 📋",
-            disconnected: "Getrennt ❌",
-            copyButton: "📋 Kopieren"
-        },
-        fr: {
-            language: "Langue",
-            searchPlaceholder: "Rechercher des langues...",
-            placeholder: "Ajouter une tâche",
-            shareToggle: "📡 Accès partagé",
-            shareToggleClose: "📡 Fermer l'accès partagé",
-            yourId: "Ton ID:",
-            connectFriend: "Se connecter à un ami:",
-            friendIdPlaceholder: "Entrez l'ID de l'ami",
-            connected: "Connecté à l'ami! 🎉",
-            copied: "ID copié! 📋",
-            disconnected: "Déconnecté ❌",
-            copyButton: "📋 Copier"
-        },
-        es: {
-            language: "Idioma",
-            searchPlaceholder: "Buscar idiomas...",
-            placeholder: "Añadir tarea",
-            shareToggle: "📡 Acceso compartido",
-            shareToggleClose: "📡 Cerrar acceso compartido",
-            yourId: "Tu ID:",
-            connectFriend: "Conectarse con amigo:",
-            friendIdPlaceholder: "Ingresa ID del amigo",
-            connected: "¡Conectado con amigo! 🎉",
-            copied: "¡ID copiado! 📋",
-            disconnected: "Desconectado ❌",
-            copyButton: "📋 Copiar"
-        },
-        it: {
-            language: "Lingua",
-            searchPlaceholder: "Cerca lingue...",
-            placeholder: "Aggiungi attività",
-            shareToggle: "📡 Accesso condiviso",
-            shareToggleClose: "📡 Chiudi accesso condiviso",
-            yourId: "Il tuo ID:",
-            connectFriend: "Connettiti con amico:",
-            friendIdPlaceholder: "Inserisci ID amico",
-            connected: "Connesso con amico! 🎉",
-            copied: "ID copiato! 📋",
-            disconnected: "Disconnesso ❌",
-            copyButton: "📋 Copia"
-        },
-        pt: {
-            language: "Idioma",
-            searchPlaceholder: "Pesquisar idiomas...",
-            placeholder: "Adicionar tarefa",
-            shareToggle: "📡 Acesso compartilhado",
-            shareToggleClose: "📡 Fechar acesso compartilhado",
-            yourId: "Seu ID:",
-            connectFriend: "Conectar com amigo:",
-            friendIdPlaceholder: "Digite o ID do amigo",
-            connected: "Conectado com amigo! 🎉",
-            copied: "ID copiado! 📋",
-            disconnected: "Desconectado ❌",
-            copyButton: "📋 Copiar"
-        },
-        ja: {
-            language: "言語",
-            searchPlaceholder: "言語を検索...",
-            placeholder: "タスクを追加",
-            shareToggle: "📡 共有アクセス",
-            shareToggleClose: "📡 共有アクセスを閉じる",
-            yourId: "あなたのID:",
-            connectFriend: "友達に接続:",
-            friendIdPlaceholder: "友達のIDを入力",
-            connected: "友達に接続しました！🎉",
-            copied: "IDをコピーしました！📋",
-            disconnected: "切断されました ❌",
-            copyButton: "📋 コピー"
-        },
-        ko: {
-            language: "언어",
-            searchPlaceholder: "언어 검색...",
-            placeholder: "할일 추가",
-            shareToggle: "📡 공유 액세스",
-            shareToggleClose: "📡 공유 액세스 닫기",
-            yourId: "당신의 ID:",
-            connectFriend: "친구에게 연결:",
-            friendIdPlaceholder: "친구 ID 입력",
-            connected: "친구에게 연결되었습니다! 🎉",
-            copied: "ID가 복사되었습니다! 📋",
-            disconnected: "연결 끊김 ❌",
-            copyButton: "📋 복사"
-        },
-        zh: {
-            language: "语言",
-            searchPlaceholder: "搜索语言...",
-            placeholder: "添加任务",
-            shareToggle: "📡 共享访问",
-            shareToggleClose: "📡 关闭共享访问",
-            yourId: "你的ID:",
-            connectFriend: "连接到朋友:",
-            friendIdPlaceholder: "输入朋友ID",
-            connected: "已连接到朋友！🎉",
-            copied: "ID已复制！📋",
-            disconnected: "已断开连接 ❌",
-            copyButton: "📋 复制"
-        },
-        ar: {
-            language: "اللغة",
-            searchPlaceholder: "بحث عن اللغات...",
-            placeholder: "إضافة مهمة",
-            shareToggle: "📡 الوصول المشترك",
-            shareToggleClose: "📡 إغلاق الوصول المشترك",
-            yourId: "معرفك:",
-            connectFriend: "الاتصال بصديق:",
-            friendIdPlaceholder: "أدخل معرف الصديق",
-            connected: "تم الاتصال بالصديق! 🎉",
-            copied: "تم نسخ المعرف! 📋",
-            disconnected: "تم قطع الاتصال ❌",
-            copyButton: "📋 نسخ"
-        },
-        hi: {
-            language: "भाषा",
-            searchPlaceholder: "भाषाएं खोजें...",
-            placeholder: "कार्य जोड़ें",
-            shareToggle: "📡 साझा पहुंच",
-            shareToggleClose: "📡 साझा पहुंच बंद करें",
-            yourId: "आपकी आईडी:",
-            connectFriend: "दोस्त से कनेक्ट करें:",
-            friendIdPlaceholder: "दोस्त की आईडी दर्ज करें",
-            connected: "दोस्त से कनेक्ट हो गया! 🎉",
-            copied: "आईडी कॉपी हो गई! 📋",
-            disconnected: "डिस्कनेक्ट हो गया ❌",
-            copyButton: "📋 कॉपी"
-        },
-        tr: {
-            language: "Dil",
-            searchPlaceholder: "Dilleri ara...",
-            placeholder: "Görev ekle",
-            shareToggle: "📡 Ortak Erişim",
-            shareToggleClose: "📡 Ortak Erişimi Kapat",
-            yourId: "Senin ID:",
-            connectFriend: "Arkadaşa Bağlan:",
-            friendIdPlaceholder: "Arkadaş ID'sini gir",
-            connected: "Arkadaşa bağlandı! 🎉",
-            copied: "ID kopyalandı! 📋",
-            disconnected: "Bağlantı kesildi ❌",
-            copyButton: "📋 Kopyala"
-        },
-        sv: {
-            language: "Språk",
-            searchPlaceholder: "Sök språk...",
-            placeholder: "Lägg till uppgift",
-            shareToggle: "📡 Delad åtkomst",
-            shareToggleClose: "📡 Stäng delad åtkomst",
-            yourId: "Ditt ID:",
-            connectFriend: "Anslut till vän:",
-            friendIdPlaceholder: "Ange väns ID",
-            connected: "Ansluten till vän! 🎉",
-            copied: "ID kopierat! 📋",
-            disconnected: "Nedkopplad ❌",
-            copyButton: "📋 Kopiera"
-        },
-        bg: {
-            language: "Език",
-            searchPlaceholder: "Търсене на езици...",
-            placeholder: "Добави задача",
-            shareToggle: "📡 Споделен достъп",
-            shareToggleClose: "📡 Затвори споделен достъп",
-            yourId: "Твоят ID:",
-            connectFriend: "Свържи се с приятел:",
-            friendIdPlaceholder: "Въведи ID на приятел",
-            connected: "Свързан с приятел! 🎉",
-            copied: "ID копиран! 📋",
-            disconnected: "Прекъсната връзка ❌",
-            copyButton: "📋 Копирай"
-        },
-        nl: {
-            language: "Taal",
-            searchPlaceholder: "Talen zoeken...",
-            placeholder: "Voeg een taak toe",
-            shareToggle: "📡 Gedeelde toegang",
-            shareToggleClose: "📡 Sluit gedeelde toegang",
-            yourId: "Jouw ID:",
-            connectFriend: "Verbinden met vriend:",
-            friendIdPlaceholder: "Voer vriend's ID in",
-            connected: "Verbonden met vriend! 🎉",
-            copied: "ID gekopieerd! 📋",
-            disconnected: "Verbinding verbroken ❌",
-            copyButton: "📋 Kopiëren"
-        }
+        en: { appTitle: "Todo list", searchPlaceholder: "Search...", placeholder: "Add a task", shareToggle: "<i class='ph ph-broadcast'></i> Shared access", shareToggleClose: "<i class='ph ph-x-circle'></i> Close access", yourId: "Your ID:", connectFriend: "Connect to friend:", friendIdPlaceholder: "Enter friend's ID", copyButton: "Copy", connected: "Connected! <i class='ph ph-confetti'></i>", copied: "ID copied! <i class='ph ph-copy'></i>", disconnected: "Disconnected <i class='ph ph-x'></i>", darkMode: "Dark mode", staticBg: "Static background", liquidGlass: "Liquid glass", langBtn: "Language", themeBtn: "Other themes", themeDefault: "Default", deleteChat: "Delete", ttSettings: "Settings", ttTitleEdit: "Click to edit title", ttAdd: "Add", ttShare: "Connection menu", ttCopy: "Copy your ID", ttConnect: "Connect", ttDisconnect: "Disconnect", ttEditTodo: "Edit", ttSaveTodo: "Save", ttNewChat: "New chat", chatLimit: "Max 20 chats <i class='ph ph-warning'></i>" },
+        uk: { appTitle: "Todo list", searchPlaceholder: "Пошук...", placeholder: "Додайте справу", shareToggle: "<i class='ph ph-broadcast'></i> Спільний доступ", shareToggleClose: "<i class='ph ph-x-circle'></i> Закрити доступ", yourId: "Твій ID:", connectFriend: "Підключитись до друга:", friendIdPlaceholder: "Введіть ID друга", copyButton: "Копіювати", connected: "Підключено! <i class='ph ph-confetti'></i>", copied: "ID скопійовано! <i class='ph ph-copy'></i>", disconnected: "Відключено <i class='ph ph-x'></i>", darkMode: "Темний режим", staticBg: "Статичний фон", liquidGlass: "Скляний дизайн", langBtn: "Мова", themeBtn: "Інші теми", themeDefault: "За замовчуванням", deleteChat: "Видалити", ttSettings: "Налаштування", ttTitleEdit: "Натисніть, щоб змінити назву", ttAdd: "Додати", ttShare: "Меню підключення", ttCopy: "Копіювати свій ID", ttConnect: "Підключити", ttDisconnect: "Відключити", ttEditTodo: "Редагувати", ttSaveTodo: "Зберегти", ttNewChat: "Новий чат", chatLimit: "Максимум 20 чатів <i class='ph ph-warning'></i>" },
+        ru: { appTitle: "Список дел", searchPlaceholder: "Поиск...", placeholder: "Добавьте задачу", shareToggle: "<i class='ph ph-broadcast'></i> Совместный доступ", shareToggleClose: "<i class='ph ph-x-circle'></i> Закрыть доступ", yourId: "Ваш ID:", connectFriend: "Подключиться к другу:", friendIdPlaceholder: "Введите ID друга", copyButton: "Копировать", connected: "Подключено! <i class='ph ph-confetti'></i>", copied: "ID скопирован! <i class='ph ph-copy'></i>", disconnected: "Отключено <i class='ph ph-x'></i>", darkMode: "Темный режим", staticBg: "Статичный фон", liquidGlass: "Стеклянный дизайн", langBtn: "Язык", themeBtn: "Другие темы", themeDefault: "По умолчанию", deleteChat: "Удалить", ttSettings: "Настройки", ttTitleEdit: "Нажмите, чтобы изменить", ttAdd: "Добавить", ttShare: "Меню подключения", ttCopy: "Копировать ID", ttConnect: "Подключиться", ttDisconnect: "Отключиться", ttEditTodo: "Изменить", ttSaveTodo: "Сохранить", ttNewChat: "Новый чат", chatLimit: "Максимум 20 чатов <i class='ph ph-warning'></i>" },
+        pl: { appTitle: "Lista zadań", searchPlaceholder: "Szukaj...", placeholder: "Dodaj zadanie", shareToggle: "<i class='ph ph-broadcast'></i> Dostęp wspólny", shareToggleClose: "<i class='ph ph-x-circle'></i> Zamknij dostęp", yourId: "Twój ID:", connectFriend: "Połącz ze znajomym:", friendIdPlaceholder: "Wpisz ID znajomego", copyButton: "Kopiuj", connected: "Połączono! <i class='ph ph-confetti'></i>", copied: "ID skopiowane! <i class='ph ph-copy'></i>", disconnected: "Rozłączono <i class='ph ph-x'></i>", darkMode: "Tryb ciemny", staticBg: "Tło statyczne", liquidGlass: "Płynne szkło", langBtn: "Język", themeBtn: "Inne motywy", themeDefault: "Domyślny", deleteChat: "Usuń", ttSettings: "Ustawienia", ttTitleEdit: "Kliknij, aby edytować", ttAdd: "Dodaj", ttShare: "Menu połączeń", ttCopy: "Skopiuj ID", ttConnect: "Połącz", ttDisconnect: "Rozłącz", ttEditTodo: "Edytuj", ttSaveTodo: "Zapisz", ttNewChat: "Nowy czat", chatLimit: "Maksymalnie 20 czatów <i class='ph ph-warning'></i>" },
+        de: { appTitle: "Aufgabenliste", searchPlaceholder: "Suchen...", placeholder: "Aufgabe hinzufügen", shareToggle: "<i class='ph ph-broadcast'></i> Freigeben", shareToggleClose: "<i class='ph ph-x-circle'></i> Freigabe beenden", yourId: "Deine ID:", connectFriend: "Mit Freund verbinden:", friendIdPlaceholder: "Freunde-ID", copyButton: "Kopieren", connected: "Verbunden! <i class='ph ph-confetti'></i>", copied: "ID kopiert! <i class='ph ph-copy'></i>", disconnected: "Getrennt <i class='ph ph-x'></i>", darkMode: "Dunkler Modus", staticBg: "Statischer Hintergrund", liquidGlass: "Flüssiges Glas", langBtn: "Sprache", themeBtn: "Andere Themen", themeDefault: "Standard", deleteChat: "Löschen", ttSettings: "Einstellungen", ttTitleEdit: "Klicken zum Bearbeiten", ttAdd: "Hinzufügen", ttShare: "Verbindungsmenü", ttCopy: "ID kopieren", ttConnect: "Verbinden", ttDisconnect: "Trennen", ttEditTodo: "Bearbeiten", ttSaveTodo: "Speichern", ttNewChat: "Neuer Chat", chatLimit: "Maximal 20 Chats <i class='ph ph-warning'></i>" },
+        fr: { appTitle: "Liste de tâches", searchPlaceholder: "Rechercher...", placeholder: "Ajouter une tâche", shareToggle: "<i class='ph ph-broadcast'></i> Partager", shareToggleClose: "<i class='ph ph-x-circle'></i> Fermer l'accès", yourId: "Votre ID:", connectFriend: "Se connecter à un ami:", friendIdPlaceholder: "Entrer l'ID", copyButton: "Copier", connected: "Connecté! <i class='ph ph-confetti'></i>", copied: "ID copié! <i class='ph ph-copy'></i>", disconnected: "Déconnecté <i class='ph ph-x'></i>", darkMode: "Mode sombre", staticBg: "Fond statique", liquidGlass: "Verre liquide", langBtn: "Langue", themeBtn: "Autres thèmes", themeDefault: "Défaut", deleteChat: "Supprimer", ttSettings: "Paramètres", ttTitleEdit: "Modifier le titre", ttAdd: "Ajouter", ttShare: "Menu connexion", ttCopy: "Copier ID", ttConnect: "Connecter", ttDisconnect: "Déconnecter", ttEditTodo: "Modifier", ttSaveTodo: "Enregistrer", ttNewChat: "Nouveau chat", chatLimit: "Maximum 20 chats <i class='ph ph-warning'></i>" },
+        es: { appTitle: "Lista de tareas", searchPlaceholder: "Buscar...", placeholder: "Añadir tarea", shareToggle: "<i class='ph ph-broadcast'></i> Compartir", shareToggleClose: "<i class='ph ph-x-circle'></i> Cerrar", yourId: "Tu ID:", connectFriend: "Conectar con amigo:", friendIdPlaceholder: "ID del amigo", copyButton: "Copiar", connected: "¡Conectado! <i class='ph ph-confetti'></i>", copied: "¡ID copiado! <i class='ph ph-copy'></i>", disconnected: "Desconectado <i class='ph ph-x'></i>", darkMode: "Modo oscuro", staticBg: "Fondo estático", liquidGlass: "Cristal líquido", langBtn: "Idioma", themeBtn: "Otros temas", themeDefault: "Por defecto", deleteChat: "Eliminar", ttSettings: "Ajustes", ttTitleEdit: "Clic para editar", ttAdd: "Añadir", ttShare: "Menú de conexión", ttCopy: "Copiar ID", ttConnect: "Conectar", ttDisconnect: "Desconectar", ttEditTodo: "Editar", ttSaveTodo: "Guardar", ttNewChat: "Nuevo chat", chatLimit: "Máximo 20 chats <i class='ph ph-warning'></i>" },
+        pt: { appTitle: "Lista de tarefas", searchPlaceholder: "Buscar...", placeholder: "Adicionar tarefa", shareToggle: "<i class='ph ph-broadcast'></i> Compartilhar", shareToggleClose: "<i class='ph ph-x-circle'></i> Fechar", yourId: "Seu ID:", connectFriend: "Conectar com amigo:", friendIdPlaceholder: "ID do amigo", copyButton: "Copiar", connected: "Conectado! <i class='ph ph-confetti'></i>", copied: "ID copiado! <i class='ph ph-copy'></i>", disconnected: "Desconectado <i class='ph ph-x'></i>", darkMode: "Modo escuro", staticBg: "Fundo estático", liquidGlass: "Vidro líquido", langBtn: "Idioma", themeBtn: "Outros temas", themeDefault: "Padrão", deleteChat: "Excluir", ttSettings: "Configurações", ttTitleEdit: "Clique para editar", ttAdd: "Adicionar", ttShare: "Conexão", ttCopy: "Copiar ID", ttConnect: "Conectar", ttDisconnect: "Desconectar", ttEditTodo: "Editar", ttSaveTodo: "Salvar", ttNewChat: "Novo chat", chatLimit: "Máximo 20 chats <i class='ph ph-warning'></i>" },
+        it: { appTitle: "Lista cose da fare", searchPlaceholder: "Cerca...", placeholder: "Aggiungi attività", shareToggle: "<i class='ph ph-broadcast'></i> Condividi", shareToggleClose: "<i class='ph ph-x-circle'></i> Chiudi", yourId: "Tuo ID:", connectFriend: "Connetti a un amico:", friendIdPlaceholder: "ID amico", copyButton: "Copia", connected: "Connesso! <i class='ph ph-confetti'></i>", copied: "ID copiato! <i class='ph ph-copy'></i>", disconnected: "Disconnesso <i class='ph ph-x'></i>", darkMode: "Modalità scura", staticBg: "Sfondo statico", liquidGlass: "Vetro liquido", langBtn: "Lingua", themeBtn: "Altri temi", themeDefault: "Predefinito", deleteChat: "Elimina", ttSettings: "Impostazioni", ttTitleEdit: "Clicca per modificare", ttAdd: "Aggiungi", ttShare: "Menu connessione", ttCopy: "Copia ID", ttConnect: "Connetti", ttDisconnect: "Disconnetti", ttEditTodo: "Modifica", ttSaveTodo: "Salva", ttNewChat: "Nuovo chat", chatLimit: "Massimo 20 chat <i class='ph ph-warning'></i>" },
+        nl: { appTitle: "Takenlijst", searchPlaceholder: "Zoek...", placeholder: "Taak toevoegen", shareToggle: "<i class='ph ph-broadcast'></i> Delen", shareToggleClose: "<i class='ph ph-x-circle'></i> Sluiten", yourId: "Jouw ID:", connectFriend: "Verbind met vriend:", friendIdPlaceholder: "Vriend ID", copyButton: "Kopiëren", connected: "Verbonden! <i class='ph ph-confetti'></i>", copied: "ID gekopieerd! <i class='ph ph-copy'></i>", disconnected: "Verbroken <i class='ph ph-x'></i>", darkMode: "Donkere modus", staticBg: "Statische achtergrond", liquidGlass: "Vloeibaar glas", langBtn: "Taal", themeBtn: "Andere thema's", themeDefault: "Standaard", deleteChat: "Verwijderen", ttSettings: "Instellingen", ttTitleEdit: "Klik om te bewerken", ttAdd: "Toevoegen", ttShare: "Verbindingsmenu", ttCopy: "Kopieer ID", ttConnect: "Verbinden", ttDisconnect: "Verbreken", ttEditTodo: "Bewerken", ttSaveTodo: "Opslaan", ttNewChat: "Nieuwe chat", chatLimit: "Maximaal 20 chats <i class='ph ph-warning'></i>" },
+        sv: { appTitle: "Att göra", searchPlaceholder: "Sök...", placeholder: "Lägg till uppgift", shareToggle: "<i class='ph ph-broadcast'></i> Dela", shareToggleClose: "<i class='ph ph-x-circle'></i> Stäng", yourId: "Ditt ID:", connectFriend: "Anslut till vän:", friendIdPlaceholder: "Vännens ID", copyButton: "Kopiera", connected: "Ansluten! <i class='ph ph-confetti'></i>", copied: "ID kopierat! <i class='ph ph-copy'></i>", disconnected: "Frånkopplad <i class='ph ph-x'></i>", darkMode: "Mörkt läge", staticBg: "Statisk bakgrund", liquidGlass: "Flytande glas", langBtn: "Språk", themeBtn: "Andra teman", themeDefault: "Standard", deleteChat: "Radera", ttSettings: "Inställningar", ttTitleEdit: "Klicka för att redigera", ttAdd: "Lägg till", ttShare: "Anslutningsmeny", ttCopy: "Kopiera ID", ttConnect: "Anslut", ttDisconnect: "Koppla från", ttEditTodo: "Redigera", ttSaveTodo: "Spara", ttNewChat: "Ny chatt", chatLimit: "Max 20 chattar <i class='ph ph-warning'></i>" },
+        tr: { appTitle: "Yapılacaklar", searchPlaceholder: "Ara...", placeholder: "Görev ekle", shareToggle: "<i class='ph ph-broadcast'></i> Paylaş", shareToggleClose: "<i class='ph ph-x-circle'></i> Kapat", yourId: "Senin ID:", connectFriend: "Arkadaşına bağlan:", friendIdPlaceholder: "Arkadaş ID'si", copyButton: "Kopyala", connected: "Bağlandı! <i class='ph ph-confetti'></i>", copied: "ID kopyalandı! <i class='ph ph-copy'></i>", disconnected: "Bağlantı koptu <i class='ph ph-x'></i>", darkMode: "Karanlık mod", staticBg: "Statik arka plan", liquidGlass: "Sıvı cam", langBtn: "Dil", themeBtn: "Diğer temalar", themeDefault: "Varsayılan", deleteChat: "Sil", ttSettings: "Ayarlar", ttTitleEdit: "Düzenlemek için tıklayın", ttAdd: "Ekle", ttShare: "Bağlantı menüsü", ttCopy: "ID kopyala", ttConnect: "Bağlan", ttDisconnect: "Bağlantıyı kes", ttEditTodo: "Düzenle", ttSaveTodo: "Kaydet", ttNewChat: "Yeni sohbet", chatLimit: "Maksimum 20 sohbet <i class='ph ph-warning'></i>" },
+        bg: { appTitle: "Списък със задачи", searchPlaceholder: "Търсене...", placeholder: "Добавете задача", shareToggle: "<i class='ph ph-broadcast'></i> Сподели", shareToggleClose: "<i class='ph ph-x-circle'></i> Затвори", yourId: "Твоят ID:", connectFriend: "Свържи се с приятел:", friendIdPlaceholder: "ID на приятел", copyButton: "Копирай", connected: "Свързан! <i class='ph ph-confetti'></i>", copied: "ID копиран! <i class='ph ph-copy'></i>", disconnected: "Изключен <i class='ph ph-x'></i>", darkMode: "Тъмен режим", staticBg: "Статичен фон", liquidGlass: "Течно стъкло", langBtn: "Език", themeBtn: "Други теми", themeDefault: "По подразбиране", deleteChat: "Изтрий", ttSettings: "Настройки", ttTitleEdit: "Натисни за промяна", ttAdd: "Добави", ttShare: "Меню", ttCopy: "Копирай ID", ttConnect: "Свържи се", ttDisconnect: "Прекъсни", ttEditTodo: "Редактирай", ttSaveTodo: "Запази", ttNewChat: "Нов чат", chatLimit: "Максимум 20 чата <i class='ph ph-warning'></i>" },
+        ar: { appTitle: "قائمة المهام", searchPlaceholder: "بحث...", placeholder: "أضف مهمة", shareToggle: "<i class='ph ph-broadcast'></i> مشاركة", shareToggleClose: "<i class='ph ph-x-circle'></i> إغلاق", yourId: "المعرف:", connectFriend: "الاتصال بصديق:", friendIdPlaceholder: "أدخل المعرف", copyButton: "نسخ", connected: "متصل! <i class='ph ph-confetti'></i>", copied: "تم النسخ! <i class='ph ph-copy'></i>", disconnected: "غير متصل <i class='ph ph-x'></i>", darkMode: "الوضع المظلم", staticBg: "خلفية ثابتة", liquidGlass: "زجاج سائل", langBtn: "لغة", themeBtn: "مواضيع أخرى", themeDefault: "افتراضي", deleteChat: "حذف", ttSettings: "الإعدادات", ttTitleEdit: "انقر للتعديل", ttAdd: "إضافة", ttShare: "قائمة الاتصال", ttCopy: "نسخ المعرف", ttConnect: "اتصال", ttDisconnect: "قطع الاتصال", ttEditTodo: "تعديل", ttSaveTodo: "حفظ", ttNewChat: "محادثة جديدة", chatLimit: "الحد الأقصى 20 محادثة <i class='ph ph-warning'></i>" },
+        zh: { appTitle: "待办事项", searchPlaceholder: "搜索...", placeholder: "添加任务", shareToggle: "<i class='ph ph-broadcast'></i> 共享", shareToggleClose: "<i class='ph ph-x-circle'></i> 关闭", yourId: "你的 ID:", connectFriend: "连接朋友:", friendIdPlaceholder: "朋友的 ID", copyButton: "复制", connected: "已连接! <i class='ph ph-confetti'></i>", copied: "ID 已复制! <i class='ph ph-copy'></i>", disconnected: "已断开 <i class='ph ph-x'></i>", darkMode: "暗黑模式", staticBg: "静态背景", liquidGlass: "液态玻璃", langBtn: "语言", themeBtn: "其他主题", themeDefault: "默认", deleteChat: "删除", ttSettings: "设置", ttTitleEdit: "点击编辑", ttAdd: "添加", ttShare: "连接", ttCopy: "复制 ID", ttConnect: "连接", ttDisconnect: "断开", ttEditTodo: "编辑", ttSaveTodo: "保存", ttNewChat: "新聊天", chatLimit: "最多 20 个聊天 <i class='ph ph-warning'></i>" },
+        ja: { appTitle: "To-Doリスト", searchPlaceholder: "検索...", placeholder: "タスクを追加", shareToggle: "<i class='ph ph-broadcast'></i> 共有", shareToggleClose: "<i class='ph ph-x-circle'></i> 閉じる", yourId: "あなたの ID:", connectFriend: "友達に接続:", friendIdPlaceholder: "友達のID", copyButton: "コピー", connected: "接続完了! <i class='ph ph-confetti'></i>", copied: "IDをコピー! <i class='ph ph-copy'></i>", disconnected: "切断されました <i class='ph ph-x'></i>", darkMode: "ダークモード", staticBg: "静的背景", liquidGlass: "液体ガラス", langBtn: "言語", themeBtn: "他のテーマ", themeDefault: "デフォルト", deleteChat: "削除", ttSettings: "設定", ttTitleEdit: "編集", ttAdd: "追加", ttShare: "接続", ttCopy: "IDコピー", ttConnect: "接続", ttDisconnect: "切断", ttEditTodo: "編集", ttSaveTodo: "保存", ttNewChat: "新しいチャット", chatLimit: "最大20チャット <i class='ph ph-warning'></i>" },
+        ko: { appTitle: "할 일 목록", searchPlaceholder: "검색...", placeholder: "할 일 추가", shareToggle: "<i class='ph ph-broadcast'></i> 공유", shareToggleClose: "<i class='ph 포-x-circle'></i> 닫기", yourId: "귀하의 ID:", connectFriend: "친구와 연결:", friendIdPlaceholder: "친구의 ID", copyButton: "복사", connected: "연결됨! <i class='ph ph-confetti'></i>", copied: "ID 복사됨! <i class='ph ph-copy'></i>", disconnected: "연결 끊김 <i class='ph ph-x'></i>", darkMode: "다크 모드", staticBg: "정적 배경", liquidGlass: "액체 유리", langBtn: "언어", themeBtn: "다른 테마", themeDefault: "기본값", deleteChat: "삭제", ttSettings: "설정", ttTitleEdit: "수정", ttAdd: "추가", 인Share: "연결", ttCopy: "ID 복사", ttConnect: "연결", ttDisconnect: "연결 끊기", ttEditTodo: "수정", ttSaveTodo: "저장", ttNewChat: "새 채팅", chatLimit: "최대 20개 채팅 <i class='ph ph-warning'></i>" },
+        hi: { appTitle: "कार्य सूची", searchPlaceholder: "खोजें...", placeholder: "कार्य जोड़ें", shareToggle: "<i class='ph ph-broadcast'></i> साझा करें", shareToggleClose: "<i class='ph ph-x-circle'></i> बंद करें", yourId: "आपकी ID:", connectFriend: "दोस्त से जुड़ें:", friendIdPlaceholder: "दोस्त की ID", copyButton: "कॉपी", connected: "जुड़ गया! <i class='ph ph-confetti'></i>", copied: "ID कॉपी की गई! <i class='ph ph-copy'></i>", disconnected: "संपर्क टूट गया <i class='ph ph-x'></i>", darkMode: "डार्क मोड", staticBg: "स्थिर पृष्ठभूमि", liquidGlass: "तरल ग्लास", langBtn: "भाषा", themeBtn: "अन्य विषय", themeDefault: "डिफ़ॉल्ट", deleteChat: "हटाएं", ttSettings: "सेटिंग्स", ttTitleEdit: "संपादित करें", ttAdd: "जोड़ें", ttShare: "कनेक्शन", ttCopy: "ID कॉपी", ttConnect: "जुड़ें", ttDisconnect: "डिस्कनेक्ट", ttEditTodo: "संपादित करें", ttSaveTodo: "सहेजें", ttNewChat: "नई चैट", chatLimit: "अधिकतम 20 चैट <i class='ph ph-warning'></i>" }
     },
 
     init() {
-        this.setupEventListeners();
         this.loadSavedLanguage();
+        this.setupSettingsMenu();
+        this.renderThemeMenu(); 
+        this.loadSavedTheme();
         this.highlightSelectedLanguage();
     },
 
-    setupEventListeners() {
-        const langBtn = document.querySelector('.language-btn');
-        const dropdown = document.querySelector('.language-dropdown');
-        const searchInput = document.querySelector('.language-search');
+    renderThemeMenu() {
+        const isLiquid = document.body.classList.contains('liquid-glass');
+        const list = document.getElementById('themeList');
+        if (!list) return;
 
-        // Перемикання випадаючого списку
+        let html = `<button data-theme="default" class="selected">
+                        <div class="theme-preview default ${isLiquid ? 'liquid' : 'solid'}"></div>
+                        <span class="theme-name">За замовчуванням</span>
+                    </button>`;
+        
+        if (isLiquid) {
+            html += `<div class="settings-divider" style="margin: 8px 0; background: rgba(255,255,255,0.1);"></div>
+                     <div style="font-size: 11px; padding: 0 10px 5px; opacity: 0.5; font-weight: bold; text-transform: uppercase;">Liquid Gradients</div>`;
+            const liquidNames = [
+                "Ocean Blue", "Fire Orange", "Blood Red", "Deep Purple", "Mint Green", 
+                "Neon Pink", "Amethyst", "Galaxy", "Spring Grass", "Toxic Green", 
+                "Sunset", "Peach Rose", "Steel Gray", "Midnight Blue", "Coral Reef", 
+                "Cyberpunk", "Cotton Candy", "Warm Sun", "Ice Water", "Lavender", 
+                "Pastel Peach", "Cloud White", "Frost Rose", "Winter Sky", "Crystal Violet", 
+                "Neon Fuchsia", "Cyan Breeze", "Emerald Glow", "Lemonade", "Royal Indigo", 
+                "Summer Sky", "Deep Teal", "Crimson Tide", "Electric Violet", "Magenta Pop", 
+                "Azure Flow", "Pearl White", "Bright Sapphire", "Forest Emerald", "Bubblegum", 
+                "Aqua Marine", "Soft Lilac", "Golden Sand", "Deep Amethyst", "Clear Sky", 
+                "Rose Gold", "Volcano", "Lime Neon", "Purple Velvet", "Pure Black"
+            ];
+            for(let i=1; i<=50; i++) {
+                html += `<button data-theme="theme-${i}"><div class="theme-preview liquid t${i}"></div> ${liquidNames[i-1]}</button>`;
+            }
+        } else {
+            html += `<div class="settings-divider" style="margin: 8px 0; background: rgba(0,0,0,0.1);"></div>
+                     <div style="font-size: 11px; padding: 0 10px 5px; opacity: 0.5; font-weight: bold; text-transform: uppercase;">Deep Forest (Темні)</div>`;
+            const forestNames = ["Deep Forest", "Pine Needle", "Dark Navy", "Midnight Slate", "Dark Plum", "Espresso", "Charcoal", "Swamp Green", "Muddy Wood", "Storm Grey", "Iron", "Graphite", "Black Onyx", "Dark Oak", "Roasted Bean", "Obsidian", "Deep Olive", "Carbon", "Night Sky", "Jungle", "Dark Earth", "Matte Black", "Ash", "Deep Moss", "Vintage Leather"];
+            for(let i=51; i<=75; i++) {
+                html += `<button data-theme="theme-${i}"><div class="theme-preview solid t${i}"></div> ${forestNames[i-51]}</button>`;
+            }
+            html += `<div class="settings-divider" style="margin: 8px 0; background: rgba(0,0,0,0.1);"></div>
+                     <div style="font-size: 11px; padding: 0 10px 5px; opacity: 0.5; font-weight: bold; text-transform: uppercase;">Champagne (Світлі)</div>`;
+            const champNames = ["Champagne", "Soft Beige", "Linen", "Cornsilk", "Bisque", "Wheat", "Lemon Chiffon", "Khaki", "Pale Gold", "Tan", "Burlywood", "White Smoke", "Parchment", "Bone", "Alabaster", "Cream", "Sand", "Desert", "Pale Brass", "Oyster", "Vanilla", "Peach Puff", "Cashmere", "Silk", "Pearl"];
+            for(let i=76; i<=100; i++) {
+                html += `<button data-theme="theme-${i}"><div class="theme-preview solid t${i}"></div> ${champNames[i-76]}</button>`;
+            }
+        }
+        list.innerHTML = html;
+
+        const defaultThemeSpan = document.querySelector('.theme-list button[data-theme="default"] .theme-name');
+        if (defaultThemeSpan) defaultThemeSpan.textContent = this.getT('themeDefault');
+
+        const savedTheme = isLiquid 
+            ? (localStorage.getItem('theme_liquid') || 'default') 
+            : (localStorage.getItem('theme_solid') || 'theme-51');
+            
+        const selectedBtn = document.querySelector(`.theme-list button[data-theme="${savedTheme}"]`);
+        if (selectedBtn) selectedBtn.classList.add('selected');
+    },
+
+    setupSettingsMenu() {
+        const settingsBtn = document.getElementById('settingsBtn');
+        const settingsDropdown = document.getElementById('settingsDropdown');
+        const langBtn = document.getElementById('langBtn');
+        const langDropdown = document.getElementById('languageDropdown');
+        const searchInput = document.getElementById('langSearch');
+        const themeBtn = document.getElementById('themeBtn');
+        const themeDropdown = document.getElementById('themeDropdown');
+
+        if (!settingsBtn || !settingsDropdown || !langBtn || !langDropdown || !themeBtn || !themeDropdown) return;
+
+        const toggleOverlay = () => {
+            const isAnyOpen = settingsDropdown.classList.contains('active') || langDropdown.classList.contains('active') || themeDropdown.classList.contains('active');
+            document.body.classList.toggle('menu-open', isAnyOpen);
+        };
+
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (settingsDropdown.classList.contains('active')) {
+                settingsDropdown.classList.remove('active');
+                if (window.innerWidth > 768) setTimeout(() => settingsDropdown.style.display = 'none', 400);
+                
+                langDropdown.classList.remove('active');
+                themeDropdown.classList.remove('active');
+                if (window.innerWidth > 768) {
+                    setTimeout(() => langDropdown.style.display = 'none', 300);
+                    setTimeout(() => themeDropdown.style.display = 'none', 300);
+                }
+            } else {
+                if (window.innerWidth > 768) settingsDropdown.style.display = 'flex';
+                setTimeout(() => settingsDropdown.classList.add('active'), 10);
+            }
+            toggleOverlay();
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.settings-menu-container') && !e.target.closest('.solid-dropdown')) {
+                let subMenuClosed = false;
+
+                if (langDropdown.classList.contains('active')) {
+                    langDropdown.classList.remove('active');
+                    if(window.innerWidth > 768) setTimeout(() => langDropdown.style.display = 'none', 300);
+                    subMenuClosed = true;
+                }
+                if (themeDropdown.classList.contains('active')) {
+                    themeDropdown.classList.remove('active');
+                    if(window.innerWidth > 768) setTimeout(() => themeDropdown.style.display = 'none', 300);
+                    subMenuClosed = true;
+                }
+
+                if (!subMenuClosed && settingsDropdown.classList.contains('active')) {
+                    settingsDropdown.classList.remove('active');
+                    if(window.innerWidth > 768) setTimeout(() => settingsDropdown.style.display = 'none', 400);
+                }
+                toggleOverlay();
+            }
+            
+            if (e.button === 0) {
+                const isDeleteMenu = e.target.closest('.delete-chat-menu');
+                if (!isDeleteMenu) { removeDeleteMenu(); }
+            }
+        });
+        
+        settingsDropdown.addEventListener('click', (e) => e.stopPropagation());
+
         langBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            
-            if (dropdown.classList.contains('active')) {
-                this.hideDropdown();
+            if (themeDropdown.classList.contains('active')) {
+                themeDropdown.classList.remove('active');
+                if(window.innerWidth > 768) setTimeout(() => themeDropdown.style.display = 'none', 300);
+            }
+            if (langDropdown.classList.contains('active')) {
+                langDropdown.classList.remove('active');
+                if(window.innerWidth > 768) setTimeout(() => langDropdown.style.display = 'none', 300);
             } else {
-                this.showDropdown();
+                if(window.innerWidth > 768) langDropdown.style.display = 'flex';
+                setTimeout(() => langDropdown.classList.add('active'), 10);
             }
+            toggleOverlay();
         });
 
-        // Закриття випадаючого списку при кліку поза ним
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.language-switcher') && dropdown.classList.contains('active')) {
-                this.hideDropdown();
-            }
-        });
-
-        // Пошук мов
-        searchInput.addEventListener('input', (e) => {
-            this.filterLanguages(e.target.value);
-        });
-
-        // Обробник вибору мови
-        dropdown.addEventListener('click', (e) => {
-            if (e.target.tagName === 'BUTTON' && e.target.dataset.lang) {
-                this.switchLanguage(e.target.dataset.lang);
-                this.hideDropdown();
-            }
-        });
-
-        // Запобігання закриттю при кліку всередині випадаючого списку
-        dropdown.addEventListener('click', (e) => {
+        themeBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-        });
-
-        // Закриття при натисканні Escape
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && dropdown.classList.contains('active')) {
-                this.hideDropdown();
+            if (langDropdown.classList.contains('active')) {
+                langDropdown.classList.remove('active');
+                if(window.innerWidth > 768) setTimeout(() => langDropdown.style.display = 'none', 300);
             }
-        });
-    },
-
-    showDropdown() {
-        const dropdown = document.querySelector('.language-dropdown');
-        const searchInput = document.querySelector('.language-search');
-        
-        dropdown.style.display = 'flex';
-        dropdown.classList.remove('hiding');
-        
-        setTimeout(() => {
-            dropdown.classList.add('active');
-        }, 10);
-        
-        searchInput.value = '';
-        this.filterLanguages('');
-    },
-
-    hideDropdown() {
-        const dropdown = document.querySelector('.language-dropdown');
-        
-        if (dropdown.classList.contains('active')) {
-            dropdown.classList.add('hiding');
-            dropdown.classList.remove('active');
-            
-            setTimeout(() => {
-                dropdown.classList.remove('hiding');
-                dropdown.style.display = 'none';
-            }, 300);
-        }
-    },
-
-    filterLanguages(searchTerm) {
-        const buttons = document.querySelectorAll('.language-list button');
-        const lowerSearchTerm = searchTerm.toLowerCase();
-        
-        buttons.forEach(button => {
-            const text = button.textContent.toLowerCase();
-            if (text.includes(lowerSearchTerm)) {
-                button.classList.remove('hidden');
+            if (themeDropdown.classList.contains('active')) {
+                themeDropdown.classList.remove('active');
+                if(window.innerWidth > 768) setTimeout(() => themeDropdown.style.display = 'none', 300);
             } else {
-                button.classList.add('hidden');
+                if(window.innerWidth > 768) themeDropdown.style.display = 'flex';
+                setTimeout(() => themeDropdown.classList.add('active'), 10);
             }
+            toggleOverlay();
         });
+
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                document.querySelectorAll('.language-list button').forEach(btn => {
+                    btn.style.display = btn.textContent.toLowerCase().includes(term) ? 'flex' : 'none';
+                });
+            });
+        }
+
+        const langListContainer = document.getElementById('langList');
+        if (langListContainer) {
+            langListContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (btn && btn.dataset.lang) {
+                    this.switchLanguage(btn.dataset.lang);
+                    langDropdown.classList.remove('active');
+                    if(window.innerWidth > 768) setTimeout(() => langDropdown.style.display = 'none', 300);
+                    toggleOverlay();
+                }
+            });
+        }
+
+        const themeListContainer = document.getElementById('themeList');
+        if (themeListContainer) {
+            themeListContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (btn && btn.dataset.theme) {
+                    this.switchTheme(btn.dataset.theme);
+                    themeDropdown.classList.remove('active');
+                    if(window.innerWidth > 768) setTimeout(() => themeDropdown.style.display = 'none', 300);
+                    toggleOverlay();
+                }
+            });
+        }
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const freezeBgToggle = document.getElementById('freezeBgToggle');
+        const liquidGlassToggle = document.getElementById('liquidGlassToggle');
+
+        if (darkModeToggle && localStorage.getItem('darkMode') === 'true') { document.body.classList.add('dark-mode'); darkModeToggle.checked = true; }
+        
+        // ЗМІНЕНО: Коректна пауза для анімації
+        if (freezeBgToggle && localStorage.getItem('freezeBg') === 'true') { 
+            document.body.style.setProperty('animation-play-state', 'paused', 'important'); 
+            freezeBgToggle.checked = true; 
+        }
+        
+        if (liquidGlassToggle) {
+            const isLiquid = localStorage.getItem('liquidGlass') !== 'false';
+            liquidGlassToggle.checked = isLiquid;
+            document.body.classList.toggle('liquid-glass', isLiquid);
+            
+            liquidGlassToggle.addEventListener('change', (e) => {
+                const isLiquidChecked = e.target.checked;
+                document.body.classList.toggle('liquid-glass', isLiquidChecked);
+                localStorage.setItem('liquidGlass', isLiquidChecked);
+                this.renderThemeMenu();
+                
+                const savedTheme = isLiquidChecked 
+                    ? (localStorage.getItem('theme_liquid') || 'default') 
+                    : (localStorage.getItem('theme_solid') || 'theme-51');
+                    
+                this.switchTheme(savedTheme);
+            });
+        }
+
+        if (darkModeToggle) {
+            darkModeToggle.addEventListener('change', (e) => {
+                document.body.classList.toggle('dark-mode', e.target.checked);
+                localStorage.setItem('darkMode', e.target.checked);
+                const isLiq = document.body.classList.contains('liquid-glass');
+                const currTheme = isLiq ? (localStorage.getItem('theme_liquid') || 'default') : (localStorage.getItem('theme_solid') || 'theme-51');
+                this.switchTheme(currTheme);
+            });
+        }
+        
+        // ЗМІНЕНО: Логіка для кнопки паузи (тепер працює 100%)
+        if (freezeBgToggle) {
+            freezeBgToggle.addEventListener('change', (e) => {
+                document.body.style.setProperty('animation-play-state', e.target.checked ? 'paused' : 'running', 'important');
+                localStorage.setItem('freezeBg', e.target.checked);
+            });
+        }
     },
 
     switchLanguage(lang) {
-        if (!this.translations[lang]) return;
-        
+        if (!this.translations[lang]) lang = 'en'; 
         this.currentLang = lang;
         this.applyTranslations();
-        this.saveLanguage();
+        localStorage.setItem('preferredLanguage', lang);
         this.highlightSelectedLanguage();
+        renderSidebar(); 
+    },
+
+    switchTheme(themeName) {
+        const isLiquid = document.body.classList.contains('liquid-glass');
+        
+        if (isLiquid) { localStorage.setItem('theme_liquid', themeName); } 
+        else { localStorage.setItem('theme_solid', themeName); }
+        
+        // ЗМІНЕНО: Обов'язково видаляємо ВСІ теми
+        for (let i = 1; i <= 100; i++) document.body.classList.remove('theme-' + i);
+        document.body.classList.remove('theme-default');
+        
+        if (themeName !== 'default') document.body.classList.add(themeName);
+        else document.body.classList.add('theme-default'); // Додаємо клас за замовчуванням
+        
+        const lightThemes = [
+            'theme-17', 'theme-18', 'theme-19', 'theme-20', 'theme-21', 'theme-22', 'theme-23', 'theme-24', 'theme-25', 'theme-26', 'theme-28', 'theme-29', 'theme-31', 'theme-37', 'theme-42', 'theme-43', 'theme-45', 'theme-46', 'theme-48'
+        ];
+        for(let i=76; i<=100; i++) lightThemes.push('theme-'+i);
+        
+        const isLight = lightThemes.includes(themeName);
+        
+        if (isLight) { document.body.classList.add('light-text', 'light-theme-active'); } 
+        else { document.body.classList.remove('light-text', 'light-theme-active'); }
+        
+        let styleTag = document.getElementById('dynamic-theme-styles');
+        if (!styleTag) {
+            styleTag = document.createElement('style');
+            styleTag.id = 'dynamic-theme-styles';
+            document.head.appendChild(styleTag);
+        }
+
+        void document.body.offsetWidth; 
+        const rgb = window.getComputedStyle(document.body).backgroundColor;
+        let menuBgSolid = isLiquid ? (isLight ? '#f8fafc' : '#1e293b') : (rgb !== 'rgba(0, 0, 0, 0)' ? rgb : (isLight ? '#F7E7CE' : '#1A2421'));
+
+        let css = '';
+
+        if (isLiquid) {
+            css += `
+                .glass-panel { background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(16px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2) !important; color: white !important; }
+                
+                .settings-dropdown, .solid-dropdown { 
+                    background: ${menuBgSolid} !important; 
+                    backdrop-filter: none !important; 
+                    border: 1px solid ${isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.1)'} !important; 
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, ${isLight ? '0.1' : '0.4'}) !important; 
+                    color: ${isLight ? '#1e293b' : 'white'} !important; 
+                }
+                .solid-dropdown .language-search { background: ${isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.1)'} !important; color: inherit !important; }
+                
+                .glass-input { background: rgba(255, 255, 255, 0.1) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; color: white !important; backdrop-filter: blur(5px) !important; }
+                .glass-input::placeholder { color: rgba(255, 255, 255, 0.6) !important; font-weight: 400 !important; }
+                .glass-btn { background: rgba(255, 255, 255, 0.15) !important; border: 1px solid rgba(255, 255, 255, 0.3) !important; color: white !important; backdrop-filter: blur(5px) !important; box-shadow: none !important; }
+                .glass-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.25) !important; box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2) !important; }
+                li { background: rgba(255, 255, 255, 0.1) !important; backdrop-filter: blur(10px) !important; border: 1px solid rgba(255, 255, 255, 0.2) !important; color: white !important; box-shadow: none !important; }
+                li.editing { background: rgba(255, 255, 255, 0.25) !important; box-shadow: 0 8px 25px rgba(0,0,0,0.2) !important; }
+                .chat-dot { background: rgba(255, 255, 255, 0.3) !important; border: 2px solid transparent !important; }
+                .chat-dot.active { background: #ffffff !important; box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.9) !important; }
+                .todo-content.completed { text-decoration-color: rgba(255, 255, 255, 0.8) !important; opacity: 0.5 !important; }
+                .main-title, #chatTitle, .settings-item, i { color: white !important; }
+                body { color: white !important; }
+            `;
+
+            if (isLight) {
+                let normalColor = "#1e293b";
+                let darkColor = "#000000";
+                
+                css += `
+                    body.light-text:not(.dark-mode), body.light-text:not(.dark-mode) *, body.light-text:not(.dark-mode) #chatTitle, body.light-text:not(.dark-mode) .main-title { color: ${normalColor} !important; text-shadow: none !important; font-weight: 500 !important; }
+                    body.light-text.dark-mode, body.light-text.dark-mode *, body.light-text.dark-mode #chatTitle, body.light-text.dark-mode .main-title { color: ${darkColor} !important; font-weight: 700 !important; text-shadow: none !important; }
+                    
+                    body.light-text .glass-input { background: rgba(255, 255, 255, 0.5) !important; border-color: rgba(0, 0, 0, 0.4) !important; }
+                    body.light-text .glass-input::placeholder { color: rgba(0, 0, 0, 0.7) !important; font-weight: 400 !important; }
+                    body.light-text .glass-btn { background: rgba(255, 255, 255, 0.3) !important; border-color: rgba(0, 0, 0, 0.4) !important; }
+                    body.light-text .glass-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.6) !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important; }
+                    body.light-text li { background: rgba(255, 255, 255, 0.4) !important; border-color: rgba(0, 0, 0, 0.3) !important; }
+                    body.light-text li.editing { background: rgba(255, 255, 255, 0.8) !important; }
+                    body.light-text .chat-dot { background: rgba(0, 0, 0, 0.25) !important; border-color: transparent !important; }
+                    body.light-text .chat-dot.active { background: #000000 !important; box-shadow: 0 0 12px rgba(0,0,0,0.4) !important; }
+                    body.light-text .todo-content.completed { text-decoration-color: #000000 !important; opacity: 0.7 !important; }
+                `;
+            }
+
+        } else {
+            css += `
+                #freezeBgContainer { display: none !important; }
+            `;
+
+            if (isLight) {
+                let normalColor = "#1A2421";
+                let darkColor = "#000000";
+                
+                css += `
+                    body.light-text:not(.dark-mode), body.light-text:not(.dark-mode) * { color: ${normalColor} !important; text-shadow: none !important; }
+                    body.light-text:not(.dark-mode) .main-title, body.light-text:not(.dark-mode) #chatTitle, body.light-text:not(.dark-mode) .settings-item, body.light-text:not(.dark-mode) i { color: ${normalColor} !important; text-shadow: none !important; font-weight: 600 !important; }
+                    
+                    body.light-text.dark-mode, body.light-text.dark-mode * { color: ${darkColor} !important; text-shadow: none !important; }
+                    body.light-text.dark-mode .main-title, body.light-text.dark-mode #chatTitle, body.light-text.dark-mode .settings-item, body.light-text.dark-mode i { color: ${darkColor} !important; font-weight: 800 !important; text-shadow: none !important; }
+
+                    .glass-panel { background: rgba(255, 255, 255, 0.45) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important; backdrop-filter: none !important; }
+                    
+                    .settings-dropdown, .solid-dropdown { 
+                        background: ${menuBgSolid} !important; 
+                        backdrop-filter: none !important; 
+                        border: 1px solid rgba(0,0,0,0.1) !important; 
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important; 
+                    }
+                    .solid-dropdown .language-search { background: rgba(0,0,0,0.05) !important; }
+
+                    .glass-input { background: rgba(255, 255, 255, 0.5) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; backdrop-filter: none !important; font-weight: 500 !important; }
+                    .glass-input::placeholder { color: rgba(26, 36, 33, 0.6) !important; font-weight: 400 !important; }
+                    .glass-btn { background: rgba(255, 255, 255, 0.3) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; backdrop-filter: none !important; box-shadow: none !important; }
+                    .glass-btn:hover:not(:disabled) { background: rgba(255, 255, 255, 0.7) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important; }
+                    li { background: rgba(255, 255, 255, 0.4) !important; border: 1px solid rgba(0, 0, 0, 0.1) !important; backdrop-filter: none !important; box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important; font-weight: 500 !important; }
+                    li.editing { background: rgba(255, 255, 255, 0.9) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+                    .chat-dot { background: rgba(0, 0, 0, 0.15) !important; border: none !important; }
+                    .chat-dot.active { background: ${normalColor} !important; box-shadow: none !important; }
+                    .todo-content.completed { text-decoration-color: inherit !important; opacity: 0.5 !important; }
+                `;
+            } else {
+                css += `
+                    body, body * { color: #F7E7CE !important; text-shadow: none !important; }
+                    .main-title, #chatTitle, .settings-item, i { color: #F7E7CE !important; text-shadow: none !important; font-weight: 400 !important;}
+                    
+                    .glass-panel { background: rgba(0, 0, 0, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important; backdrop-filter: none !important; }
+                    
+                    .settings-dropdown, .solid-dropdown { 
+                        background: ${menuBgSolid} !important; 
+                        backdrop-filter: none !important; 
+                        border: 1px solid rgba(255,255,255,0.08) !important; 
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.5) !important; 
+                    }
+                    .solid-dropdown .language-search { background: rgba(255,255,255,0.1) !important; }
+
+                    .glass-input { background: rgba(0, 0, 0, 0.3) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; backdrop-filter: none !important; font-weight: 500 !important;}
+                    .glass-input::placeholder { color: rgba(247, 231, 206, 0.5) !important; font-weight: 400 !important;}
+                    .glass-btn { background: rgba(0, 0, 0, 0.4) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; backdrop-filter: none !important; box-shadow: none !important; }
+                    .glass-btn:hover:not(:disabled) { background: rgba(0, 0, 0, 0.6) !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important; }
+                    li { background: rgba(0, 0, 0, 0.25) !important; border: 1px solid rgba(255, 255, 255, 0.08) !important; backdrop-filter: none !important; box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important; font-weight: 500 !important;}
+                    li.editing { background: rgba(0, 0, 0, 0.6) !important; box-shadow: 0 8px 20px rgba(0,0,0,0.3) !important; }
+                    .chat-dot { background: rgba(255, 255, 255, 0.2) !important; border: none !important;}
+                    .chat-dot.active { background: #F7E7CE !important; box-shadow: none !important;}
+                    .todo-content.completed { text-decoration-color: #F7E7CE !important; opacity: 0.5 !important; }
+                `;
+            }
+        }
+        
+        css += `
+            .delete-chat-menu { position: absolute; z-index: 10000; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #000000 !important; border: none !important; cursor: pointer; white-space: nowrap; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4) !important; transition: transform 0.2s ease, background 0.2s ease; }
+            .delete-chat-menu, .delete-chat-menu * { color: white !important; font-weight: 600 !important; text-shadow: none !important; font-size: 15px; font-family: inherit; }
+            .delete-chat-menu:hover { background: #333333 !important; transform: scale(1.05); }
+        `;
+        
+        styleTag.innerHTML = css;
+        
+        document.querySelectorAll('.theme-list button').forEach(btn => btn.classList.remove('selected'));
+        const selectedBtn = document.querySelector(`.theme-list button[data-theme="${themeName}"]`);
+        if (selectedBtn) selectedBtn.classList.add('selected');
+    },
+
+    loadSavedTheme() {
+        const isLiquid = document.body.classList.contains('liquid-glass');
+        const savedTheme = isLiquid 
+            ? (localStorage.getItem('theme_liquid') || 'default') 
+            : (localStorage.getItem('theme_solid') || 'theme-51');
+        this.switchTheme(savedTheme);
+    },
+
+    safeSetText(id, text) { const el = document.getElementById(id); if (el && text !== undefined) el.textContent = text; },
+    safeSetHTML(id, html) { const el = document.getElementById(id); if (el && html !== undefined) el.innerHTML = html; },
+    safeSetPlaceholder(id, text) { const el = document.getElementById(id); if (el && text !== undefined) el.placeholder = text; },
+    safeSetTooltip(id, text) { 
+        const el = document.getElementById(id); 
+        if (el && text !== undefined) { 
+            if(el.hasAttribute('data-tooltip-bottom')) el.dataset.tooltipBottom = text; 
+            else el.dataset.tooltip = text; 
+        } 
     },
 
     applyTranslations() {
-        const t = this.translations[this.currentLang];
+        const t = this.translations[this.currentLang] || this.translations['en'];
         
-        document.getElementById('text').placeholder = t.placeholder;
-        document.querySelector('.language-btn').textContent = `🌐 ${t.language}`;
-        document.querySelector('.language-search').placeholder = t.searchPlaceholder;
+        this.safeSetText('mainAppTitle', t.appTitle);
+        this.safeSetPlaceholder('text', t.placeholder);
+        this.safeSetPlaceholder('langSearch', t.searchPlaceholder);
+        this.safeSetHTML('langBtn', `<i class="ph ph-translate"></i> <span>${t.langBtn}</span> <i class="ph ph-caret-right" style="margin-left: auto;"></i>`);
+        this.safeSetHTML('themeBtn', `<i class="ph ph-palette"></i> <span id="themeBtnText">${t.themeBtn}</span> <i class="ph ph-caret-right" style="margin-left: auto;"></i>`);
         
+        const defaultThemeSpan = document.querySelector('.theme-list button[data-theme="default"] .theme-name');
+        if (defaultThemeSpan) defaultThemeSpan.textContent = t.themeDefault;
+
         const shareBtn = document.getElementById('shareToggleBtn');
         const sharePanel = document.getElementById('sharePanel');
+        if (shareBtn && sharePanel) shareBtn.innerHTML = sharePanel.classList.contains('open') ? t.shareToggleClose : t.shareToggle;
         
-        if (sharePanel.classList.contains('open')) {
-            shareBtn.textContent = t.shareToggleClose;
-        } else {
-            shareBtn.textContent = t.shareToggle;
-        }
+        this.safeSetText('yourIdLabel', t.yourId);
+        this.safeSetText('connectFriendLabel', t.connectFriend);
+        this.safeSetPlaceholder('friendIdInput', t.friendIdPlaceholder);
+        this.safeSetHTML('copyIdBtn', `<i class="ph ph-copy"></i> ${t.copyButton}`);
+        this.safeSetHTML('connectedIndicator', t.connected);
+        this.safeSetHTML('copiedIndicator', t.copied);
+        this.safeSetHTML('disconnectedIndicator', t.disconnected);
         
-        document.querySelector('.id-container label').textContent = t.yourId;
-        document.querySelector('.connect-container label').textContent = t.connectFriend;
-        document.getElementById('friendIdInput').placeholder = t.friendIdPlaceholder;
+        this.safeSetHTML('limitIndicator', t.chatLimit || "Максимум 20 чатів <i class='ph ph-warning'></i>");
         
-        document.getElementById('copyIdBtn').textContent = t.copyButton;
+        this.safeSetText('darkModeLabel', t.darkMode);
+        this.safeSetText('staticBgLabel', t.staticBg);
+        this.safeSetText('liquidGlassLabel', t.liquidGlass || "Liquid glass");
+
+        this.safeSetTooltip('settingsBtn', t.ttSettings);
+        this.safeSetTooltip('chatTitle', t.ttTitleEdit);
+        this.safeSetTooltip('btn', t.ttAdd);
+        this.safeSetTooltip('shareToggleBtn', t.ttShare);
+        this.safeSetTooltip('copyIdBtn', t.ttCopy);
+        this.safeSetTooltip('connectBtn', t.ttConnect);
+        this.safeSetTooltip('disconnectBtn', t.ttDisconnect);
         
-        document.getElementById('connectedIndicator').textContent = t.connected;
-        document.getElementById('copiedIndicator').textContent = t.copied;
-        document.getElementById('disconnectedIndicator').textContent = t.disconnected;
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.dataset.tooltip = t.ttEditTodo);
+        document.querySelectorAll('.save-btn').forEach(btn => btn.dataset.tooltip = t.ttSaveTodo);
     },
 
     highlightSelectedLanguage() {
-        document.querySelectorAll('.language-list button').forEach(btn => {
-            btn.classList.remove('selected');
-        });
-        
+        document.querySelectorAll('.language-list button').forEach(btn => btn.classList.remove('selected'));
         const selectedBtn = document.querySelector(`.language-list button[data-lang="${this.currentLang}"]`);
-        if (selectedBtn) {
-            selectedBtn.classList.add('selected');
-        }
-    },
-
-    isCloseText(text) {
-        const closeKeywords = [
-            'Закрити', 'Close', 'Cerrar', 'Fermer', 'Schließen', 'Zamknij', 
-            'Chiudi', 'Fechar', '閉じる', '닫기', '关闭', 'إغلاق', 'Закрыть',
-            'Sluit', 'Stäng', 'Kapat', 'बंद करें', 'Затвори'
-        ];
-        return closeKeywords.some(keyword => text.includes(keyword));
-    },
-
-    saveLanguage() {
-        localStorage.setItem('preferredLanguage', this.currentLang);
+        if (selectedBtn) selectedBtn.classList.add('selected');
     },
 
     loadSavedLanguage() {
         const savedLang = localStorage.getItem('preferredLanguage');
-        if (savedLang && this.translations[savedLang]) {
-            this.switchLanguage(savedLang);
-        }
-    }
+        if (savedLang) this.switchLanguage(savedLang);
+        else this.applyTranslations(); 
+    },
+    
+    getT(key) { return (this.translations[this.currentLang] || this.translations['en'])[key] || ""; }
 };
 
-// ==================== TODOLIST LOGIC ====================
-let count = 1;
-let list = document.getElementById("todolist");
-let draggedItem = null;
+// ==================== CORE APP LOGIC ====================
 
-function initSharePanel() {
-    const shareToggleBtn = document.getElementById('shareToggleBtn');
-    const sharePanel = document.getElementById('sharePanel');
-    
-    shareToggleBtn.addEventListener('click', function() {
-        const isOpening = !sharePanel.classList.contains('open');
-        
-        if (isOpening) {
-            sharePanel.classList.remove('closing', 'fade-out');
-            sharePanel.classList.add('open');
-        } else {
-            sharePanel.classList.add('closing');
-            setTimeout(() => {
-                sharePanel.classList.remove('open', 'closing');
-            }, 300);
-        }
-        
-        const t = languageManager.translations[languageManager.currentLang];
-        if (isOpening) {
-            shareToggleBtn.textContent = t.shareToggleClose;
-        } else {
-            shareToggleBtn.textContent = t.shareToggle;
-        }
-    });
-    
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.share-panel') && 
-            !e.target.closest('#shareToggleBtn') && 
-            sharePanel.classList.contains('open')) {
-            
-            sharePanel.classList.add('closing');
-            setTimeout(() => {
-                sharePanel.classList.remove('open', 'closing');
-            }, 300);
-            
-            const t = languageManager.translations[languageManager.currentLang];
-            shareToggleBtn.textContent = t.shareToggle;
-        }
-    });
-}
+const getChatElements = () => [
+    document.getElementById("chatTitle"),
+    document.querySelector(".input-container"),
+    document.getElementById("shareToggleBtn"),
+    document.getElementById("sharePanel"),
+    document.getElementById("todolist")
+].filter(el => el);
 
-function saveTodos() {
-    const todos = [];
-    document.querySelectorAll("#todolist li").forEach(li => {
-        const span = li.querySelector(".todo-content");
-        todos.push({ id: li.id, text: span ? span.textContent : li.textContent });
-    });
-    localStorage.setItem("todos", JSON.stringify(todos));
-}
+function initApp() {
+    renderSidebar();
+    renderActiveChat();
+    initSharePanel();
 
-function loadTodos() {
-    const todos = JSON.parse(localStorage.getItem("todos")) || [];
-    todos.forEach(todo => {
-        const li = createTodoElement(todo.text, todo.id);
-        list.append(li);
-        li.style.animation = "fadeIn 0.3s ease forwards";
-    });
-    if (todos.length > 0) count = Math.max(...todos.map(t => parseInt(t.id.replace('Item', '')) || 0)) + 1;
-}
-
-function createTodoElement(text, id = null) {
-    const li = document.createElement("li");
-    li.id = id || `Item${count}`;
-    li.style.opacity = "0";
-    li.style.animation = "fadeIn 0.3s ease forwards";
-
-    const contentSpan = document.createElement("span");
-    contentSpan.className = "todo-content";
-    contentSpan.style.whiteSpace = "pre-wrap";
-    contentSpan.textContent = text;
-
-    const editBtn = document.createElement("button");
-    editBtn.textContent = "✏️";
-    editBtn.className = "edit-btn";
-    editBtn.title = "Редагувати";
-
-    const saveBtn = document.createElement("button");
-    saveBtn.textContent = "💾";
-    saveBtn.className = "save-btn";
-    saveBtn.title = "Зберегти";
-
-    editBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        
-        li.classList.add('editing');
-        
-        const textarea = document.createElement("textarea");
-        textarea.className = "edit-textarea";
-        textarea.value = contentSpan.textContent;
-        
-        const startHeight = li.offsetHeight;
-        
-        li.innerHTML = "";
-        li.append(textarea, saveBtn);
-        
-        const endHeight = li.offsetHeight;
-        li.style.height = startHeight + 'px';
-        
-        requestAnimationFrame(() => {
-            li.style.transition = 'height 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            li.style.height = endHeight + 'px';
+    const titleEl = document.getElementById('chatTitle');
+    if (titleEl) {
+        titleEl.addEventListener('blur', saveChatTitle);
+        titleEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); titleEl.blur(); }
         });
+    }
 
-        textarea.focus();
+    const btn = document.getElementById("btn");
+    if (btn) btn.addEventListener("click", add);
+}
 
-        textarea.addEventListener("keydown", (event) => {
-            if(event.key === "Enter"){
-                if(event.shiftKey){
-                    const pos = textarea.selectionStart;
-                    const before = textarea.value.substring(0, pos);
-                    const after = textarea.value.substring(pos);
-                    textarea.value = before + "\n" + after;
-                    textarea.selectionStart = textarea.selectionEnd = pos + 1;
-                    event.preventDefault();
-                } else {
-                    event.preventDefault();
-                    saveBtn.click();
-                }
-            } else if (event.key === "Escape") {
-                cancelEdit();
-            }
-        });
-
-        const cancelEdit = () => {
-            textarea.classList.add('closing');
-            li.classList.remove('editing');
-            li.classList.add('saving');
-            
-            const currentHeight = li.offsetHeight;
-            li.style.height = currentHeight + 'px';
-            
-            requestAnimationFrame(() => {
-                li.style.transition = 'height 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                li.style.height = startHeight + 'px';
-                
-                setTimeout(() => {
-                    li.innerHTML = "";
-                    li.append(contentSpan, editBtn);
-                    li.style.height = '';
-                    li.style.transition = '';
-                    li.classList.remove('saving');
-                }, 250);
-            });
+function renderSidebar() {
+    const sidebar = document.getElementById('chatSidebar');
+    if (!sidebar) return;
+    sidebar.innerHTML = '';
+    
+    chatsData.forEach(chat => {
+        const dot = document.createElement('button');
+        dot.id = 'dot-' + chat.id; 
+        dot.className = `chat-dot ${chat.id === activeChatId ? 'active' : ''}`;
+        dot.dataset.tooltip = chat.name;
+        
+        dot.onclick = (e) => {
+            switchChat(chat.id);
         };
 
-        saveBtn.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const newText = textarea.value.trim();
-            if(newText !== ""){
-                contentSpan.textContent = newText;
-                
-                textarea.classList.add('closing');
-                li.classList.remove('editing');
-                li.classList.add('saving');
-                
-                const currentHeight = li.offsetHeight;
-                li.style.height = currentHeight + 'px';
-                
+        let pressTimer;
+        
+        const startPress = (e) => {
+            if(e.type === 'mousedown' && e.button !== 0) return;
+            pressTimer = setTimeout(() => { showDeleteMenu(chat.id, dot); }, 600); 
+        };
+        const cancelPress = () => clearTimeout(pressTimer);
+
+        dot.addEventListener('mousedown', startPress);
+        dot.addEventListener('mouseup', cancelPress);
+        dot.addEventListener('mouseleave', cancelPress);
+        
+        dot.addEventListener('contextmenu', (e) => {
+            e.preventDefault(); 
+            cancelPress();
+            showDeleteMenu(chat.id, dot);
+        });
+        
+        dot.addEventListener('touchstart', startPress, {passive: true});
+        dot.addEventListener('touchmove', cancelPress, {passive: true});
+        dot.addEventListener('touchend', cancelPress);
+        dot.addEventListener('touchcancel', cancelPress);
+
+        sidebar.appendChild(dot);
+    });
+
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-chat-btn';
+    addBtn.innerHTML = '<i class="ph ph-plus"></i>';
+    addBtn.dataset.tooltip = languageManager.getT('ttNewChat') || "Новий чат";
+    addBtn.onclick = (e) => { e.stopPropagation(); removeDeleteMenu(); createNewChat(); };
+    sidebar.appendChild(addBtn);
+}
+
+function removeDeleteMenu() {
+    const existing = document.querySelector('.delete-chat-menu');
+    if (existing) existing.remove();
+}
+
+function showDeleteMenu(chatId, dotElement) {
+    removeDeleteMenu();
+    if (chatsData.length <= 1) return;
+
+    const btn = document.createElement('button');
+    btn.className = 'delete-chat-menu glass-btn';
+    btn.innerHTML = `<i class="ph ph-trash"></i> <span>${languageManager.getT('deleteChat') || "Видалити"}</span>`;
+    document.body.appendChild(btn);
+
+    const rect = dotElement.getBoundingClientRect();
+
+    if (window.innerWidth <= 768) {
+        btn.style.left = (rect.left + rect.width / 2) + 'px';
+        btn.style.top = (rect.top - 40) + 'px';
+        btn.style.transform = 'translate(-50%, 0)';
+    } else {
+        btn.style.top = (rect.top + rect.height / 2) + 'px';
+        btn.style.left = (rect.left - 10) + 'px';
+        btn.style.transform = 'translate(-100%, -50%)';
+    }
+
+    const handleDelete = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        btn.remove();
+        deleteChat(chatId);
+    };
+
+    btn.onmousedown = handleDelete;
+    btn.ontouchstart = handleDelete;
+}
+
+function deleteChat(id) {
+    const dotElement = document.getElementById(`dot-${id}`);
+    const isActiveChat = (id === activeChatId);
+    
+    if (dotElement) dotElement.classList.add('deleting');
+    
+    const els = getChatElements();
+
+    const performDeletion = () => {
+        chatsData = chatsData.filter(c => c.id !== id);
+        if (isActiveChat) activeChatId = chatsData[0].id;
+        saveAllData();
+        renderSidebar();
+        
+        if (isActiveChat) {
+            els.forEach(el => {
+                el.style.transition = 'none';
+                el.style.transform = 'translateX(-50px) scale(0.95)';
+                el.style.opacity = '0';
+            });
+            
+            renderActiveChat();
+            
+            requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    li.style.transition = 'height 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    li.style.height = startHeight + 'px';
+                    els.forEach((el, index) => {
+                        el.style.transition = `all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.03}s`;
+                        el.style.transform = 'translateX(0) scale(1)';
+                        el.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            el.style.transition = ""; el.style.transform = ""; el.style.opacity = "";
+                        }, 450);
+                    });
+                });
+            });
+        }
+        if(peerManager.conn) peerManager.sendData();
+    };
+
+    if (isActiveChat) {
+        els.forEach((el, index) => {
+            el.style.transition = `all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) ${index * 0.03}s`;
+            el.style.transform = 'translateX(100px) scale(0.9)';
+            el.style.opacity = '0';
+        });
+        setTimeout(performDeletion, 400); 
+    } else {
+        setTimeout(performDeletion, 300);
+    }
+}
+
+function switchChat(id) {
+    if (activeChatId === id) return;
+    
+    const els = getChatElements();
+    
+    els.forEach((el, index) => {
+        el.style.transition = `all 0.3s ease ${index * 0.02}s`;
+        el.style.transform = 'translateY(15px)';
+        el.style.opacity = '0';
+    });
+    
+    setTimeout(() => {
+        activeChatId = id;
+        localStorage.setItem('todolist_active_chat', id);
+        renderSidebar();
+        
+        els.forEach(el => {
+            el.style.transition = 'none';
+            el.style.transform = 'translateY(-15px)';
+            el.style.opacity = '0';
+        });
+        
+        renderActiveChat();
+        
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                els.forEach((el, index) => {
+                    el.style.transition = `all 0.3s ease ${index * 0.02}s`;
+                    el.style.transform = 'translateY(0)';
+                    el.style.opacity = '1';
                     
                     setTimeout(() => {
-                        li.innerHTML = "";
-                        li.append(contentSpan, editBtn);
-                        li.style.height = '';
-                        li.style.transition = '';
-                        li.classList.remove('saving');
-                        saveTodos();
-                        peerManager.sendTodos();
-                    }, 250);
+                        el.style.transition = ""; el.style.transform = ""; el.style.opacity = "";
+                    }, 350);
                 });
-            } else {
-                textarea.focus();
-            }
+            });
+        });
+    }, 300); 
+}
+
+function createNewChat() {
+    if (chatsData.length >= 20) {
+        peerManager.showInd('limitIndicator');
+        return;
+    }
+
+    const newChat = { id: 'chat_' + Date.now(), name: `Chat ${chatsData.length + 1}`, todos: [] };
+    chatsData.push(newChat);
+    saveAllData();
+    switchChat(newChat.id);
+    if(peerManager.conn) peerManager.sendData();
+}
+
+function saveChatTitle() {
+    const titleEl = document.getElementById('chatTitle');
+    if (!titleEl) return;
+    const newTitle = titleEl.textContent.trim() || "Unnamed Chat";
+    titleEl.textContent = newTitle; 
+    
+    const activeChat = chatsData.find(c => c.id === activeChatId);
+    if (activeChat && activeChat.name !== newTitle) {
+        activeChat.name = newTitle;
+        saveAllData(); renderSidebar(); 
+        if(peerManager.conn) peerManager.sendData();
+    }
+}
+
+function renderActiveChat() {
+    const activeChat = chatsData.find(c => c.id === activeChatId);
+    if (!activeChat) return;
+
+    const titleEl = document.getElementById('chatTitle');
+    if (titleEl) titleEl.textContent = activeChat.name;
+    
+    const list = document.getElementById("todolist");
+    if (!list) return;
+    list.innerHTML = "";
+    activeChat.todos.forEach(todo => list.append(createTodoElement(todo.text, todo.id, false)));
+}
+
+function saveAllData() {
+    const activeChat = chatsData.find(c => c.id === activeChatId);
+    if (activeChat) {
+        const todos = [];
+        document.querySelectorAll("#todolist li:not(.deleting)").forEach(li => {
+            const span = li.querySelector(".todo-content");
+            if (span) todos.push({ id: li.id, text: span.textContent });
+            else todos.push({ id: li.id, text: li.innerText.replace(/[\n\r]+|[\s]{2,}/g, ' ').trim() });
+        });
+        activeChat.todos = todos;
+    }
+    localStorage.setItem("todolist_chats", JSON.stringify(chatsData));
+}
+
+function createTodoElement(text, id = null, isNew = true) {
+    const li = document.createElement("li");
+    li.id = id || `Item_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    if (isNew) { li.className = 'new-item'; setTimeout(() => li.classList.remove('new-item'), 600); }
+
+    const contentSpan = document.createElement("span");
+    contentSpan.className = "todo-content"; contentSpan.textContent = text;
+
+    const editBtn = document.createElement("button");
+    editBtn.innerHTML = "<i class='ph ph-pencil-simple'></i>"; editBtn.className = "edit-btn glass-btn";
+    editBtn.dataset.tooltip = languageManager.getT('ttEditTodo') || "Редагувати";
+
+    const saveBtn = document.createElement("button");
+    saveBtn.innerHTML = "<i class='ph ph-floppy-disk'></i>"; saveBtn.className = "save-btn glass-btn";
+    saveBtn.dataset.tooltip = languageManager.getT('ttSaveTodo') || "Зберегти";
+
+    editBtn.addEventListener("click", (e) => {
+        e.stopPropagation(); li.classList.add('editing');
+        const textarea = document.createElement("textarea");
+        textarea.className = "edit-textarea glass-input"; textarea.value = contentSpan.textContent;
+        li.innerHTML = ""; li.append(textarea, saveBtn); textarea.focus();
+
+        const cancelEdit = () => { li.classList.remove('editing'); li.innerHTML = ""; li.append(contentSpan, editBtn); };
+        textarea.addEventListener("keydown", (event) => {
+            if (event.key === "Enter" && !event.shiftKey) { event.preventDefault(); saveBtn.click(); } else if (event.key === "Escape") cancelEdit();
+        });
+        saveBtn.addEventListener("click", (e) => {
+            e.stopPropagation(); const newText = textarea.value.trim();
+            if (newText !== "") {
+                contentSpan.textContent = newText; li.classList.remove('editing'); li.innerHTML = ""; li.append(contentSpan, editBtn);
+                saveAllData(); if(peerManager.conn) peerManager.sendData();
+            } else textarea.focus(); 
         });
     });
 
     li.append(contentSpan, editBtn);
 
     li.addEventListener("click", (e) => {
-        if(e.target.tagName !== "BUTTON" && !li.querySelector("textarea")){
-            const contentSpan = li.querySelector('.todo-content');
-            contentSpan.classList.add('completed');
-            contentSpan.style.animation = 'strikeThrough 0.3s ease forwards';
-            
+        if(e.target.tagName !== "BUTTON" && !e.target.closest('button') && !li.querySelector("textarea") && !li.classList.contains('deleting')) {
+            const content = li.querySelector('.todo-content'); if(content) content.classList.add('completed');
             li.classList.add('deleting');
-            
             setTimeout(() => {
-                li.remove();
-                saveTodos();
-                peerManager.sendTodos();
-            }, 500);
+                li.style.height = li.offsetHeight + 'px'; li.offsetHeight; li.classList.add('collapsing');
+                li.style.height = '0px'; li.style.paddingTop = '0px'; li.style.paddingBottom = '0px'; li.style.marginTop = '0px'; li.style.marginBottom = '0px'; li.style.borderWidth = '0px';
+                setTimeout(() => { li.remove(); saveAllData(); if(peerManager.conn) peerManager.sendData(); }, 400); 
+            }, 400); 
         }
     });
 
     li.draggable = true;
-    li.addEventListener("dragstart", (e) => {
-        draggedItem = e.target;
-        e.target.classList.add("dragging");
-    });
-
-    li.addEventListener("dragend", (e) => {
-        e.target.classList.remove("dragging");
-        draggedItem = null;
-        saveTodos();
-        peerManager.sendTodos();
-    });
+    li.addEventListener("dragstart", (e) => { draggedItem = e.target; e.target.classList.add("dragging"); });
+    li.addEventListener("dragend", (e) => { e.target.classList.remove("dragging"); draggedItem = null; saveAllData(); if(peerManager.conn) peerManager.sendData(); });
 
     return li;
 }
 
 function add() {
     const textarea = document.getElementById("text");
+    if (!textarea) return;
     const text = textarea.value.trim();
     if(text !== ""){
-        const li = createTodoElement(text);
-        list.append(li);
-        count++;
-        saveTodos();
-        peerManager.sendTodos();
+        const list = document.getElementById("todolist");
+        if (list) { list.append(createTodoElement(text, null, true)); saveAllData(); if(peerManager.conn) peerManager.sendData(); }
     }
-    textarea.value = "";
-    textarea.focus();
+    textarea.value = ""; textarea.focus();
 }
 
-const textareaInput = document.getElementById("text");
-textareaInput.addEventListener("keydown", function(e) {
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    if(e.key === "Enter"){
-        if(isMobile){
-            const pos = this.selectionStart;
-            const before = this.value.substring(0, pos);
-            const after = this.value.substring(pos);
-            this.value = before + "\n" + after;
-            this.selectionStart = this.selectionEnd = pos + 1;
-            e.preventDefault();
-        } else {
-            if(e.shiftKey){
-                const pos = this.selectionStart;
-                const before = this.value.substring(0, pos);
-                const after = this.value.substring(pos);
-                this.value = before + "\n" + after;
-                this.selectionStart = this.selectionEnd = pos + 1;
-                e.preventDefault();
-            } else {
-                e.preventDefault();
-                add();
-            }
+const mainTextInput = document.getElementById("text");
+if (mainTextInput) mainTextInput.addEventListener("keydown", function(e) { if(e.key === "Enter" && !e.shiftKey){ e.preventDefault(); add(); } });
+
+const todoListContainer = document.getElementById("todolist");
+if (todoListContainer) {
+    todoListContainer.addEventListener("dragover", (e) => {
+        e.preventDefault(); const closest = e.target.closest("li");
+        if(!closest || closest === draggedItem) return;
+        const rect = closest.getBoundingClientRect();
+        if((e.clientY - rect.top) > rect.height / 2) closest.after(draggedItem); else closest.before(draggedItem);
+    });
+}
+
+// ==================== SHARE PANEL & PEERJS ====================
+function initSharePanel() {
+    const shareToggleBtn = document.getElementById('shareToggleBtn');
+    const sharePanel = document.getElementById('sharePanel');
+    if (!shareToggleBtn || !sharePanel) return;
+    shareToggleBtn.addEventListener('click', function() {
+        const isOpening = !sharePanel.classList.contains('open');
+        const t = languageManager.translations[languageManager.currentLang] || languageManager.translations['en'];
+        if (isOpening) { 
+            sharePanel.classList.add('open'); 
+            shareToggleBtn.innerHTML = t.shareToggleClose || "<i class='ph ph-x-circle'></i> Close access"; 
+        } else { 
+            sharePanel.classList.remove('open'); 
+            shareToggleBtn.innerHTML = t.shareToggle || "<i class='ph ph-broadcast'></i> Shared access"; 
         }
-    }
-});
+    });
+}
 
-list.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    const closest = e.target.closest("li");
-    if(!closest || closest === draggedItem) return;
-    const rect = closest.getBoundingClientRect();
-    const offset = e.clientY - rect.top;
-    if(offset > rect.height / 2) closest.after(draggedItem);
-    else closest.before(draggedItem);
-});
-
-// ==================== IMPROVED PEERJS MANAGER ====================
 const peerManager = {
-    peer: null,
-    conn: null,
-    
+    peer: null, conn: null,
     init() {
-        document.getElementById("myPeerId").textContent = "Завантаження...";
-        
-        const savedPeerId = this.getSavedPeerId();
-        
-        this.peer = new Peer(savedPeerId, {
-            debug: 2
-        });
-        
-        this.peer.on('open', (id) => {
-            console.log('My peer ID is: ' + id);
-            document.getElementById("myPeerId").textContent = id;
-            this.savePeerId(id);
-            this.updateConnectionButtons(false);
-        });
-        
-        this.peer.on('connection', (connection) => {
-            console.log('Incoming connection from: ' + connection.peer);
-            this.conn = connection;
-            this.setupConnection();
-        });
-        
+        const myPeerIdEl = document.getElementById("myPeerId");
+        if (myPeerIdEl) myPeerIdEl.textContent = "Завантаження...";
+        this.peer = new Peer(localStorage.getItem('peerId'), { debug: 2 });
+        this.peer.on('open', (id) => { if (myPeerIdEl) myPeerIdEl.textContent = id; localStorage.setItem('peerId', id); this.updateConnectionButtons(false); });
+        this.peer.on('connection', (c) => { this.conn = c; this.setupConnection(); });
         this.peer.on('error', (err) => {
-            console.error('Peer error:', err);
-            
-            if (err.type === 'unavailable-id') {
-                console.log('ID вже зайнятий, генеруємо новий...');
-                localStorage.removeItem('peerId');
-                this.init();
-            } else {
-                document.getElementById("myPeerId").textContent = "Помилка: " + err.message;
-                this.updateConnectionButtons(false);
-            }
+            if (err.type === 'unavailable-id') { localStorage.removeItem('peerId'); this.init(); } 
+            else { if (myPeerIdEl) myPeerIdEl.textContent = "Помилка"; this.updateConnectionButtons(false); }
         });
-        
-        document.getElementById("connectBtn").onclick = () => this.connectToFriend();
-        document.getElementById("disconnectBtn").onclick = () => this.disconnect();
-        document.getElementById("copyIdBtn").onclick = () => this.copyMyId();
+        const connBtn = document.getElementById("connectBtn"); const disconnBtn = document.getElementById("disconnectBtn"); const copyBtn = document.getElementById("copyIdBtn");
+        if (connBtn) connBtn.onclick = () => this.connectToFriend();
+        if (disconnBtn) disconnBtn.onclick = () => this.disconnect();
+        if (copyBtn) copyBtn.onclick = () => this.copyMyId();
     },
-    
-    getSavedPeerId() {
-        return localStorage.getItem('peerId');
-    },
-    
-    savePeerId(id) {
-        localStorage.setItem('peerId', id);
-    },
-    
     connectToFriend() {
-        const friendId = document.getElementById("friendIdInput").value.trim();
-        if (!friendId) {
-            alert("Введіть ID друга");
-            return;
-        }
-        
-        console.log('Connecting to: ' + friendId);
+        const friendIdInput = document.getElementById("friendIdInput"); if (!friendIdInput) return;
+        const id = friendIdInput.value.trim(); if (!id) return;
         this.updateConnectionButtons(true);
-        
-        try {
-            this.conn = this.peer.connect(friendId, {
-                reliable: true
-            });
-            this.setupConnection();
-        } catch (error) {
-            console.error('Connection failed:', error);
-            alert('Помилка підключення: ' + error.message);
-            this.updateConnectionButtons(false);
-        }
+        try { this.conn = this.peer.connect(id, { reliable: true }); this.setupConnection(); } catch (e) { this.updateConnectionButtons(false); }
     },
-    
-    disconnect() {
-        if (this.conn) {
-            this.conn.close();
-            this.conn = null;
-        }
-        this.updateConnectionButtons(false);
-        this.showDisconnectedIndicator();
-    },
-    
+    disconnect() { if (this.conn) { this.conn.close(); this.conn = null; } this.updateConnectionButtons(false); this.showInd("disconnectedIndicator"); },
     setupConnection() {
         if (!this.conn) return;
-        
-        this.conn.on('open', () => {
-            console.log('Connection established with: ' + this.conn.peer);
-            this.updateConnectionButtons(true);
-            this.showConnectedIndicator();
-            this.sendTodos();
-        });
-        
+        this.conn.on('open', () => { this.updateConnectionButtons(true); this.showInd("connectedIndicator"); this.sendData(); });
         this.conn.on('data', (data) => {
-            console.log('Received data:', data);
-            this.applyRemoteTodos(data);
+            if (data && Array.isArray(data)) {
+                chatsData = data;
+                if (!chatsData.find(c => c.id === activeChatId)) activeChatId = chatsData[0].id;
+                saveAllData(); renderSidebar(); renderActiveChat();
+            }
         });
-        
-        this.conn.on('close', () => {
-            console.log('Connection closed');
-            this.updateConnectionButtons(false);
-            this.showDisconnectedIndicator();
-        });
-        
-        this.conn.on('error', (err) => {
-            console.error('Connection error:', err);
-            this.updateConnectionButtons(false);
-            alert('Помилка зʼєднання: ' + err.message);
-        });
+        this.conn.on('close', () => { this.updateConnectionButtons(false); this.showInd("disconnectedIndicator"); });
     },
-    
     updateConnectionButtons(isConnected) {
-        const connectBtn = document.getElementById("connectBtn");
-        const disconnectBtn = document.getElementById("disconnectBtn");
-        const friendInput = document.getElementById("friendIdInput");
-        
-        if (isConnected) {
-            connectBtn.disabled = true;
-            disconnectBtn.disabled = false;
-            friendInput.disabled = true;
-        } else {
-            connectBtn.disabled = false;
-            disconnectBtn.disabled = true;
-            friendInput.disabled = false;
-        }
+        const connectBtn = document.getElementById("connectBtn"); const disconnectBtn = document.getElementById("disconnectBtn"); const friendIdInput = document.getElementById("friendIdInput");
+        if (connectBtn) connectBtn.disabled = isConnected; if (disconnectBtn) disconnectBtn.disabled = !isConnected; if (friendIdInput) friendIdInput.disabled = isConnected;
     },
-    
-    sendTodos() {
-        if (this.conn && this.conn.open) {
-            const todos = JSON.parse(localStorage.getItem("todos")) || [];
-            console.log('Sending todos:', todos);
-            this.conn.send(todos);
-        }
-    },
-    
-    applyRemoteTodos(todos) {
-        console.log('Applying remote todos:', todos);
-        list.innerHTML = "";
-        todos.forEach(todo => {
-            const li = createTodoElement(todo.text, todo.id);
-            list.append(li);
-        });
-        localStorage.setItem("todos", JSON.stringify(todos));
-        
-        if (todos.length > 0) {
-            count = Math.max(...todos.map(t => parseInt(t.id.replace('Item', '')) || 0)) + 1;
-        }
-    },
-    
+    sendData() { if (this.conn && this.conn.open) this.conn.send(chatsData); },
     copyMyId() {
-        const myId = document.getElementById("myPeerId").textContent;
-        if (myId === "Завантаження..." || myId.startsWith("Помилка:")) {
-            alert("ID ще не завантажено або сталася помилка");
-            return;
-        }
-        
-        navigator.clipboard.writeText(myId).then(() => {
-            this.showCopiedIndicator();
-        }).catch(err => {
-            console.error('Copy failed:', err);
-            const textArea = document.createElement("textarea");
-            textArea.value = myId;
-            document.body.appendChild(textArea);
-            textArea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textArea);
-            this.showCopiedIndicator();
-        });
+        const myPeerIdEl = document.getElementById("myPeerId"); if (!myPeerIdEl) return;
+        const myId = myPeerIdEl.textContent; if (myId === "Завантаження..." || myId.includes("Помилка")) return;
+        navigator.clipboard.writeText(myId).then(() => { this.showInd("copiedIndicator"); });
     },
-    
-    showCopiedIndicator() {
-        const ind = document.getElementById("copiedIndicator");
-        ind.style.top = "20px";
-        ind.style.opacity = "1";
-        setTimeout(() => {
-            ind.style.top = "-50px";
-            ind.style.opacity = "0";
-        }, 2000);
-    },
-    
-    showConnectedIndicator() {
-        const ind = document.getElementById("connectedIndicator");
-        ind.style.top = "20px";
-        ind.style.opacity = "1";
-        setTimeout(() => {
-            ind.style.top = "-50px";
-            ind.style.opacity = "0";
-        }, 3000);
-    },
-    
-    showDisconnectedIndicator() {
-        const ind = document.getElementById("disconnectedIndicator");
-        ind.style.top = "20px";
-        ind.style.opacity = "1";
-        setTimeout(() => {
-            ind.style.top = "-50px";
-            ind.style.opacity = "0";
-        }, 2000);
+    showInd(id) {
+        const el = document.getElementById(id); if (!el) return;
+        globalToastZIndex++;
+        el.style.zIndex = globalToastZIndex;
+        el.style.top = "20px"; el.style.opacity = "1";
+        setTimeout(() => { el.style.top = "-60px"; el.style.opacity = "0"; }, 2500);
     }
 };
 
-// Initialize everything when page loads
 window.addEventListener("load", function() {
-    loadTodos();
-    initSharePanel();
-    languageManager.init();
-    peerManager.init();
+    try { languageManager.init(); } catch (e) { console.error(e); }
+    try { initApp(); } catch (e) { console.error(e); }
+    try { peerManager.init(); } catch (e) { console.error(e); }
 });
