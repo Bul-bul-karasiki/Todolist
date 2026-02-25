@@ -1,1180 +1,337 @@
-/* Кастомний скрол для всіх елементів */
-::-webkit-scrollbar { 
-    width: 6px; 
-}
+/* ================= СУПЕР ПРОЗОРИЙ GLASS-СКРОЛБАР ================= */
+html { height: 100%; overflow: hidden; background-color: #1A2421; }
+* { scrollbar-width: thin !important; scrollbar-color: rgba(255, 255, 255, 0.3) transparent !important; }
+::-webkit-scrollbar { width: 8px !important; height: 8px !important; background: transparent !important; }
+::-webkit-scrollbar-track { background: transparent !important; }
+::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.3) !important; border-radius: 10px !important; border: none !important; }
+::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.5) !important; }
+body:not(.dark-mode) * { scrollbar-color: rgba(0, 0, 0, 0.2) transparent !important; }
+body:not(.dark-mode) ::-webkit-scrollbar-thumb { background-color: rgba(0, 0, 0, 0.2) !important; }
 
-::-webkit-scrollbar-track { 
-    background: rgba(0,0,0,0.1); 
-    border-radius: 3px; 
-}
-
-::-webkit-scrollbar-thumb { 
-    background: rgba(0,0,0,0.3); 
-    border-radius: 3px; 
-}
-
-::-webkit-scrollbar-thumb:hover { 
-    background: rgba(0,0,0,0.5); 
-}
-       
-/* ФІКС ДЛЯ БІЛОГО ПІКСЕЛЯ ТА SCROLL */
-html, body {
-    overflow-x: hidden;
-    overflow-y: auto;
-    max-width: 100%;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
+/* ================= БАЗОВІ СТИЛІ ТА DARK MODE ЗАТЕМНЕННЯ ================= */
 body {
-    display: flex;
-    justify-content: center;
-    background-color: skyblue;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
+    height: 100%; overflow-y: auto; overflow-x: hidden; margin: 0; padding: 0;
+    display: flex; flex-direction: column;
+    font-family: 'Segoe UI', Arial, sans-serif; font-size: 16px;
+    box-sizing: border-box; color: #F7E7CE; transition: background-color 0.5s ease, background-image 0.5s ease, color 0.3s ease; z-index: 0;
     position: relative;
-    min-height: 100vh;
-    box-sizing: border-box;
-    padding: 0;
-    margin: 0;
 }
 
-/* Головний контейнер */
-.main-container {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    padding: 30px 0;
-    box-sizing: border-box;
-    overflow: visible;
-}
-
-/* Перемикач мов - ВИПРАВЛЕННЯ БІЛОГО ПІКСЕЛЯ */
-.language-switcher {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 1000;
-}
-
-.language-btn {
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(0, 0, 0, 1);
-    border-radius: 8px;
-    padding: 10px 15px;
-    color: white;
-    cursor: pointer;
-    font-size: 14px;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    min-width: 80px;
-    position: relative;
-    z-index: 1002;
-}
-
-.language-btn:hover {
-    background: rgba(0, 0, 0, 0.8);
-    transform: scale(1.05);
-}
-
-/* ВИПРАВЛЕННЯ ГОРИЗОНТАЛЬНОГО СКРОЛУ ТА БІЛОГО ПІКСЕЛЯ */
-.language-dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    margin-top: 5px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(0, 0, 0, 1);
-    border-radius: 8px;
-    backdrop-filter: blur(10px);
-    display: none;
-    flex-direction: column;
-    min-width: 220px;
-    max-height: 400px;
-    overflow: hidden;
-    z-index: 1001;
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-    transform-origin: top right;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.language-dropdown.active {
-    display: flex;
-    opacity: 1;
-    transform: translateY(0) scale(1);
-}
-
-.language-dropdown.hiding {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.95);
-}
-
-.language-search-container {
-    padding: 12px 15px 10px 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: rgba(0, 0, 0, 0.3);
-    flex-shrink: 0;
-}
-
-/* ВИПРАВЛЕННЯ ГОРИЗОНТАЛЬНОГО СКРОЛУ */
-.language-list {
-    max-height: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 8px 5px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.language-list button {
-    background: none;
-    border: none;
-    color: white;
-    padding: 12px 18px;
-    cursor: pointer;
-    text-align: left;
-    transition: all 0.2s ease;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 14px;
-    width: calc(100% - 10px);
-    display: block;
-    border-radius: 4px;
-    margin: 2px 5px;
-    opacity: 0;
-    transform: translateX(10px);
-    animation: slideInRight 0.3s ease forwards;
-    box-sizing: border-box;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.language-list button:nth-child(1) { animation-delay: 0.05s; }
-.language-list button:nth-child(2) { animation-delay: 0.1s; }
-.language-list button:nth-child(3) { animation-delay: 0.15s; }
-.language-list button:nth-child(4) { animation-delay: 0.2s; }
-.language-list button:nth-child(5) { animation-delay: 0.25s; }
-.language-list button:nth-child(6) { animation-delay: 0.3s; }
-.language-list button:nth-child(7) { animation-delay: 0.35s; }
-.language-list button:nth-child(8) { animation-delay: 0.4s; }
-.language-list button:nth-child(9) { animation-delay: 0.45s; }
-.language-list button:nth-child(10) { animation-delay: 0.5s; }
-.language-list button:nth-child(11) { animation-delay: 0.55s; }
-.language-list button:nth-child(12) { animation-delay: 0.6s; }
-.language-list button:nth-child(13) { animation-delay: 0.65s; }
-.language-list button:nth-child(14) { animation-delay: 0.7s; }
-.language-list button:nth-child(15) { animation-delay: 0.75s; }
-.language-list button:nth-child(16) { animation-delay: 0.8s; }
-.language-list button:nth-child(17) { animation-delay: 0.85s; }
-
-.language-list button:last-child {
-    border-bottom: none;
-}
-
-.language-list button:hover {
-    background: rgba(255, 255, 255, 0.12);
-    transform: translateX(5px);
-}
-
-/* Стилі для обраної мови */
-.language-list button.selected {
-    background: rgba(255, 255, 255, 0.25) !important;
-    border-left: 3px solid rgba(255, 255, 255, 0.8);
-    font-weight: 600;
-}
-
-.language-list button.selected:hover {
-    background: rgba(255, 255, 255, 0.35) !important;
-    transform: translateX(8px);
-    border-left: 3px solid rgba(255, 255, 255, 1);
-}
-
-.language-list button.hidden {
-    display: none;
-    animation: none;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.language-search {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid rgba(255,255,255,0.3);
-    border-radius: 6px;
-    background: rgba(255,255,255,0.15);
-    color: white;
-    font-size: 14px;
-    outline: none;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-}
-
-.language-search::placeholder {
-    color: rgba(255,255,255,0.7);
-}
-
-.language-search:focus {
-    border-color: rgba(255,255,255,0.6);
-    background: rgba(255,255,255,0.2);
-    box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
-    transform: scale(1.02);
-}
-
-/* Сповіщення */
-#connectedIndicator, #copiedIndicator, #disconnectedIndicator {
-    position: fixed;
-    top: -40px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    padding: 12px 25px;
-    border-radius: 10px;
-    font-weight: bold;
-    opacity: 0;
-    transition: top 0.4s ease, opacity 0.4s ease;
-    z-index: 1000;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    font-size: 14px;
-}
-
-#connectedIndicator { 
-    background-color: #4CAF50; 
-}
-
-#copiedIndicator { 
-    background-color: #2196F3; 
-}
-
-#disconnectedIndicator { 
-    background-color: #f44336; 
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 25px;
-    color: #333;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.wrapper {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 0 20px;
-    box-sizing: border-box;
-    position: relative;
-    overflow: visible;
-}
-
-.input-container {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    width: 100%;
-    flex-wrap: nowrap;
-    margin-bottom: 15px;
-}
-
-textarea#text {
-    flex: 1;
-    min-height: 50px;
-    max-height: 150px;
-    font-size: 18px;
-    padding: 12px 18px;
-    border-radius: 12px;
-    resize: none;
-    background-color: lightgray;
-    border: 3px solid black;
-    outline: none;
-    transition: border-color 0.3s ease;
-    min-width: 0;
-    font-family: inherit;
-    box-sizing: border-box;
-}
-
-textarea#text:focus { 
-    border-color: #666; 
-}
-
-button#btn {
-    background-color: lightgray;
-    border: 3px solid black;
-    border-radius: 12px;
-    width: 60px;
-    height: 60px;
-    font-size: 28px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    font-weight: bold;
-}
-
-button#btn:hover {
-    background-color: #d0d0d0;
-    transform: scale(1.05);
-}
-
-/* Кнопка для спільного доступу - ВИПРАВЛЕНА ВЕРСІЯ */
-.share-toggle-btn {
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(0,0,0,0.3);
-    border-radius: 12px;
-    padding: 15px 30px;
-    font-size: 18px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-bottom: 15px;
-    color: #333;
-    width: 100%;
-    text-align: center;
-    outline: none;
-}
-
-.share-toggle-btn:hover {
-    background: rgba(255,255,255,0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-
-/* ============ СТАРІ СТИЛІ ПАНЕЛІ СПІЛЬНОГО ДОСТУПУ ============ */
-.share-panel {
-    width: 100%;
-    background: rgba(255,255,255,0.15);
-    border: 2px solid rgba(0,0,0,0.3);
-    border-radius: 15px;
-    padding: 0;
-    backdrop-filter: blur(10px);
-    max-height: 0;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    opacity: 0;
-    box-sizing: border-box;
-    transform: scaleY(0.8) translateY(-10px);
-    transform-origin: top center;
-    will-change: transform, opacity, max-height;
-}
-
-.share-panel.open {
-    max-height: 400px;
-    padding: 25px;
-    opacity: 1;
-    overflow: visible;
-    transform: scaleY(1) translateY(0);
-    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.share-panel.closing {
-    max-height: 0;
-    padding: 0 25px;
-    opacity: 0;
-    transform: scaleY(0.8) translateY(-10px);
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.peer-section {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.id-container, .connect-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.id-container label, .connect-container label {
-    font-weight: bold;
-    color: #333;
-    font-size: 16px;
-}
-
-.id-display {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.3);
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 2px solid rgba(0,0,0,0.2);
-    box-sizing: border-box;
-}
-
-#myPeerId {
-    flex: 1;
-    font-family: monospace;
-    word-break: break-all;
-    color: #333;
-    font-size: 14px;
-    font-weight: 500;
-}
-
-.icon-btn {
-    background: lightgray;
-    border: 2px solid black;
-    border-radius: 8px;
-    padding: 8px 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    min-width: 40px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-}
-
-.icon-btn:hover { 
-    background: #d0d0d0; 
-    transform: scale(1.05); 
-}
-
-/* ВИПРАВЛЕННЯ ДЛЯ КНОПОК ПІДКЛЮЧЕННЯ - ЗАПОБІГАННЯ ПЕРЕНОСУ */
-.connect-inputs {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-wrap: nowrap;
-    width: 100%;
-}
-
-#friendIdInput {
-    flex: 1;
-    padding: 14px 18px;
-    border-radius: 10px;
-    border: 2px solid black;
-    background: lightgray;
-    outline: none;
-    transition: border-color 0.3s ease;
-    min-width: 120px;
-    font-size: 14px;
-    font-family: inherit;
-    box-sizing: border-box;
-    flex-shrink: 1;
-}
-
-#friendIdInput:focus { 
-    border-color: #666; 
-}
-
-.connection-buttons {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-shrink: 0;
-}
-
-.connect-btn, .disconnect-btn {
-    background: lightgray;
-    border: 2px solid black;
-    border-radius: 10px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    min-width: 45px;
-    width: 45px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    font-size: 16px;
-}
-
-.connect-btn:hover:not(:disabled) { 
-    background: #d0d0d0; 
-    transform: translateY(-2px); 
-}
-
-.disconnect-btn:hover:not(:disabled) { 
-    background: #ffcccc; 
-    transform: translateY(-2px); 
-}
-
-.connect-btn:disabled, .disconnect-btn:disabled { 
-    opacity: 0.5; 
-    cursor: not-allowed; 
-    transform: none; 
-}
-
-/* Індикатор кількості підключених - ВИДАЛЕНО */
-.connection-counter {
-    display: none !important;
-}
-
-/* Анімація зникнення для панелі */
-@keyframes fadeOutScale {
-    from {
-        opacity: 1;
-        transform: scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: scale(0.9);
-    }
-}
-
-.share-panel.fade-out {
-    animation: fadeOutScale 0.3s ease-out forwards;
-}
-
-ul#todolist {
-    width: 100%;
-    padding: 0;
-    list-style: none;
-    margin-top: 25px;
-    margin-bottom: 20px;
-}
-
-/* Анімації для редагування */
-li {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 100%;
-    margin: 12px auto;
-    padding: 18px 24px;
-    border-radius: 12px;
-    background: rgba(0,0,0,0.2);
-    color: white;
-    box-shadow: -6px 0px 72px -17px rgba(0,0,0,0.23);
-    border: 1px solid rgba(0,0,0,0.3);
-    transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    text-align: center;
-    white-space: pre-wrap;
-    word-break: break-word;
-    position: relative;
-    opacity: 1;
-    overflow: hidden;
-    font-size: 20px;
-    box-sizing: border-box;
-    transform-origin: center top;
-}
-
-li.editing {
-    background: rgba(0,0,0,0.4);
-    transform: scale(1.02);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-li.saving {
-    background: rgba(0,0,0,0.3);
-    transform: scale(1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-li:hover { 
-    background-color: rgba(0,0,0,0.3); 
-    color: rgb(206,204,204); 
-}
-
-.dragging { 
-    opacity: 0.4; 
-    transform: scale(1.03); 
-}
-
-@keyframes fadeIn { 
-    from { 
-        opacity: 0; 
-        transform: translateY(-10px); 
-    } 
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    } 
-}
-
-@keyframes fadeOut { 
-    from { 
-        opacity: 1; 
-        transform: translateX(0); 
-    } 
-    to { 
-        opacity: 0; 
-        transform: translateX(100px); 
-    } 
-}
-
-/* Плавні анімації для переміщення справ при видаленні */
-@keyframes slideUp {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-30px) scale(0.95);
-    }
-}
-
-@keyframes smoothSlideUp {
-    from {
-        transform: translateY(0);
-    }
-    to {
-        transform: translateY(-30px);
-    }
-}
-
-@keyframes smoothReturn {
-    from {
-        transform: translateY(-30px);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-
-/* Фіксована висота textarea зі скролом */
-.edit-textarea {
-    flex: 1;
-    padding: 16px 20px;
-    border-radius: 12px;
-    border: 3px solid rgba(255,255,255,0.4);
-    background: rgba(0,0,0,0.3);
-    color: white;
-    outline: none;
-    resize: none;
-    font-family: inherit;
-    height: 120px;
-    min-height: 120px;
-    max-height: 120px;
-    overflow-y: auto;
-    backdrop-filter: blur(10px);
-    transition: all 0.2s ease;
-    min-width: 0;
-    text-align: left;
-    font-size: 18px;
-    line-height: 1.4;
-    box-sizing: border-box;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    animation: textareaAppear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes textareaAppear {
-    from {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes textareaDisappear {
-    from {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-    to {
-        opacity: 0;
-        transform: translateY(-10px) scale(0.95);
-    }
-}
-
-.edit-textarea.closing {
-    animation: textareaDisappear 0.2s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
-}
-
-@keyframes contentAppear {
-    from {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.todo-content {
-    flex: 1;
-    padding-right: 12px;
-    word-break: break-word;
-    min-width: 0;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    animation: contentAppear 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-/* Анімація для кнопок редагування */
-.edit-btn, .save-btn {
-    background: rgba(0,0,0,0.3);
-    border: 2px solid rgba(255,255,255,0.5);
-    border-radius: 10px;
-    padding: 10px 14px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    min-width: 50px;
-    height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 12px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    backdrop-filter: blur(5px);
-    flex-shrink: 0;
-    font-size: 16px;
-    animation: buttonAppear 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-}
-
-@keyframes buttonAppear {
-    from {
-        opacity: 0;
-        transform: scale(0.8) rotate(-10deg);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1) rotate(0);
-    }
-}
-
-.edit-btn:hover, .save-btn:hover { 
-    background: rgba(0,0,0,0.4); 
-    transform: scale(1.1) rotate(5deg); 
-    box-shadow: 0 4px 8px rgba(0,0,0,0.4); 
-}
-
-/* Фікс для видалення зайвих відступів та скролу */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-/* ============ НОВІ СТИЛІ ДЛЯ АНІМАЦІЇ ВИДАЛЕННЯ ВПРАВО ============ */
-/* Анімація видалення вправо */
-@keyframes slideOutRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(100px);
-    }
-}
-
-/* Ефект перекреслення тексту */
-.todo-content.completed {
-    text-decoration: line-through;
-    text-decoration-thickness: 2px;
-    text-decoration-color: rgba(255, 255, 255, 0.8);
-    opacity: 0.7;
-    transition: all 0.3s ease;
-}
-
-/* Анімація для перекреслення */
-@keyframes strikeThrough {
-    from {
-        text-decoration: none;
-        opacity: 1;
-    }
-    to {
-        text-decoration: line-through;
-        opacity: 0.7;
-    }
-}
-
-/* Стиль для елемента, який видаляється */
-li.deleting {
-    animation: slideOutRight 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important;
-}
-
-/* ==================== MEDIA QUERIES ==================== */
-
-/* Планшети та маленькі монітори */
+body::before {
+    content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: rgba(0,0,0,0); transition: background 0.4s ease;
+}
+body.dark-mode::before { background: rgba(0,0,0, 0.4); }
+body.dark-mode.light-theme-active::before { background: rgba(0,0,0, 0.75); }
+
+/* Оверлей для телефонів, який з'являється при відкритті меню */
+body::after {
+    content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+}
+body.menu-open::after { opacity: 1; pointer-events: auto; }
+
+@keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+/* ================= 1-50: LIQUID GLASS ТЕМИ (ТЕПЕР АНІМУЮТЬСЯ ВСІ) ================= */
+body.liquid-glass { background-size: 400% 400% !important; animation: gradientBG 15s ease infinite; }
+body.liquid-glass.theme-default, body.liquid-glass:not([class*="theme-"]) { background-image: linear-gradient(-45deg, #1e3c72, #2a5298, #ff6a00, #ee0979) !important; background-color: #1e3c72; }
+
+/* Дублюємо кольори, щоб анімація була помітною для кожної теми */
+body.theme-1 { background-image: linear-gradient(-45deg, #00c6ff, #0072ff, #00c6ff, #0072ff) !important; }
+body.theme-2 { background-image: linear-gradient(-45deg, #f12711, #f5af19, #f12711, #f5af19) !important; }
+body.theme-3 { background-image: linear-gradient(-45deg, #ff416c, #ff4b2b, #ff416c, #ff4b2b) !important; }
+body.theme-4 { background-image: linear-gradient(-45deg, #8E2DE2, #4A00E0, #8E2DE2, #4A00E0) !important; }
+body.theme-5 { background-image: linear-gradient(-45deg, #11998e, #38ef7d, #11998e, #38ef7d) !important; }
+body.theme-6 { background-image: linear-gradient(-45deg, #FC466B, #3F5EFB, #FC466B, #3F5EFB) !important; }
+body.theme-7 { background-image: linear-gradient(-45deg, #4568DC, #B06AB3, #4568DC, #B06AB3) !important; }
+body.theme-8 { background-image: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #0f0c29) !important; }
+body.theme-9 { background-image: linear-gradient(-45deg, #00b09b, #96c93d, #00b09b, #96c93d) !important; }
+body.theme-10 { background-image: linear-gradient(-45deg, #DCE35B, #45B649, #DCE35B, #45B649) !important; }
+body.theme-11 { background-image: linear-gradient(-45deg, #ee0979, #ff6a00, #ee0979, #ff6a00) !important; }
+body.theme-12 { background-image: linear-gradient(-45deg, #3a1c71, #d76d77, #ffaf7b, #3a1c71) !important; }
+body.theme-13 { background-image: linear-gradient(-45deg, #bdc3c7, #2c3e50, #bdc3c7, #2c3e50) !important; }
+body.theme-14 { background-image: linear-gradient(-45deg, #141E30, #243B55, #141E30, #243B55) !important; }
+body.theme-15 { background-image: linear-gradient(-45deg, #ff9966, #ff5e62, #ff9966, #ff5e62) !important; }
+body.theme-16 { background-image: linear-gradient(-45deg, #7F00FF, #E100FF, #7F00FF, #E100FF) !important; }
+body.theme-17 { background-image: linear-gradient(-45deg, #ff9a9e, #fecfef, #ff9a9e, #fecfef) !important; }
+body.theme-18 { background-image: linear-gradient(-45deg, #f6d365, #fda085, #f6d365, #fda085) !important; }
+body.theme-19 { background-image: linear-gradient(-45deg, #84fab0, #8fd3f4, #84fab0, #8fd3f4) !important; }
+body.theme-20 { background-image: linear-gradient(-45deg, #a18cd1, #fbc2eb, #a18cd1, #fbc2eb) !important; }
+body.theme-21 { background-image: linear-gradient(-45deg, #ffecd2, #fcb69f, #ffecd2, #fcb69f) !important; }
+body.theme-22 { background-image: linear-gradient(-45deg, #cfd9df, #e2ebf0, #cfd9df, #e2ebf0) !important; }
+body.theme-23 { background-image: linear-gradient(-45deg, #a8edea, #fed6e3, #a8edea, #fed6e3) !important; }
+body.theme-24 { background-image: linear-gradient(-45deg, #f5f7fa, #c3cfe2, #f5f7fa, #c3cfe2) !important; }
+body.theme-25 { background-image: linear-gradient(-45deg, #e0c3fc, #8ec5fc, #e0c3fc, #8ec5fc) !important; }
+body.theme-26 { background-image: linear-gradient(-45deg, #f093fb, #f5576c, #f093fb, #f5576c) !important; }
+body.theme-27 { background-image: linear-gradient(-45deg, #4facfe, #00f2fe, #4facfe, #00f2fe) !important; }
+body.theme-28 { background-image: linear-gradient(-45deg, #43e97b, #38f9d7, #43e97b, #38f9d7) !important; }
+body.theme-29 { background-image: linear-gradient(-45deg, #fa709a, #fee140, #fa709a, #fee140) !important; }
+body.theme-30 { background-image: linear-gradient(-45deg, #667eea, #764ba2, #667eea, #764ba2) !important; }
+body.theme-31 { background-image: linear-gradient(-45deg, #89f7fe, #66a6ff, #89f7fe, #66a6ff) !important; }
+body.theme-32 { background-image: linear-gradient(-45deg, #13547a, #80d0c7, #13547a, #80d0c7) !important; }
+body.theme-33 { background-image: linear-gradient(-45deg, #ff0844, #ffb199, #ff0844, #ffb199) !important; }
+body.theme-34 { background-image: linear-gradient(-45deg, #b224ef, #7579ff, #b224ef, #7579ff) !important; }
+body.theme-35 { background-image: linear-gradient(-45deg, #c471f5, #fa71cd, #c471f5, #fa71cd) !important; }
+body.theme-36 { background-image: linear-gradient(-45deg, #48c6ef, #6f86d6, #48c6ef, #6f86d6) !important; }
+body.theme-37 { background-image: linear-gradient(-45deg, #feada6, #f5efef, #feada6, #f5efef) !important; }
+body.theme-38 { background-image: linear-gradient(-45deg, #00c6fb, #005bea, #00c6fb, #005bea) !important; }
+body.theme-39 { background-image: linear-gradient(-45deg, #0ba360, #3cba92, #0ba360, #3cba92) !important; }
+body.theme-40 { background-image: linear-gradient(-45deg, #ff758c, #ff7eb3, #ff758c, #ff7eb3) !important; }
+body.theme-41 { background-image: linear-gradient(-45deg, #209cff, #68e0cf, #209cff, #68e0cf) !important; }
+body.theme-42 { background-image: linear-gradient(-45deg, #cd9cf2, #f6f3ff, #cd9cf2, #f6f3ff) !important; }
+body.theme-43 { background-image: linear-gradient(-45deg, #e6b980, #eacda3, #e6b980, #eacda3) !important; }
+body.theme-44 { background-image: linear-gradient(-45deg, #30cfd0, #330867, #30cfd0, #330867) !important; }
+body.theme-45 { background-image: linear-gradient(-45deg, #a1c4fd, #c2e9fb, #a1c4fd, #c2e9fb) !important; }
+body.theme-46 { background-image: linear-gradient(-45deg, #ffc3a0, #ffafbd, #ffc3a0, #ffafbd) !important; }
+body.theme-47 { background-image: linear-gradient(-45deg, #f83600, #f9d423, #f83600, #f9d423) !important; }
+body.theme-48 { background-image: linear-gradient(-45deg, #d4fc79, #96e6a1, #d4fc79, #96e6a1) !important; }
+body.theme-49 { background-image: linear-gradient(-45deg, #845ec2, #d65db1, #845ec2, #d65db1) !important; }
+body.theme-50 { background-image: linear-gradient(-45deg, #000000, #434343, #000000, #434343) !important; }
+
+/* ================= 51-100: SOLID ТЕМИ ================= */
+body:not(.liquid-glass):not([class*="theme-"]) { background-color: #1A2421 !important; background-image: none !important; animation: none !important; }
+
+body.theme-51 { background-color: #1A2421 !important; } body.theme-52 { background-color: #24332D !important; } body.theme-53 { background-color: #1B262C !important; }
+body.theme-54 { background-color: #0F172A !important; } body.theme-55 { background-color: #2E1F27 !important; } body.theme-56 { background-color: #3E2723 !important; }
+body.theme-57 { background-color: #1B1B1B !important; } body.theme-58 { background-color: #2F4F4F !important; } body.theme-59 { background-color: #4A4036 !important; }
+body.theme-60 { background-color: #36454F !important; } body.theme-61 { background-color: #2C3539 !important; } body.theme-62 { background-color: #343434 !important; }
+body.theme-63 { background-color: #28282B !important; } body.theme-64 { background-color: #3D2B1F !important; } body.theme-65 { background-color: #4B3621 !important; }
+body.theme-66 { background-color: #191C20 !important; } body.theme-67 { background-color: #232B2B !important; } body.theme-68 { background-color: #353839 !important; }
+body.theme-69 { background-color: #252850 !important; } body.theme-70 { background-color: #123524 !important; } body.theme-71 { background-color: #1A1110 !important; }
+body.theme-72 { background-color: #212121 !important; } body.theme-73 { background-color: #2C2C2B !important; } body.theme-74 { background-color: #181A18 !important; }
+body.theme-75 { background-color: #2A2A35 !important; }
+body.theme-76 { background-color: #F7E7CE !important; } body.theme-77 { background-color: #F5F5DC !important; } body.theme-78 { background-color: #FAF0E6 !important; }
+body.theme-79 { background-color: #FFF8DC !important; } body.theme-80 { background-color: #FFE4C4 !important; } body.theme-81 { background-color: #F5DEB3 !important; }
+body.theme-82 { background-color: #FFFACD !important; } body.theme-83 { background-color: #F0E68C !important; } body.theme-84 { background-color: #EEDD82 !important; }
+body.theme-85 { background-color: #D2B48C !important; } body.theme-86 { background-color: #DEB887 !important; } body.theme-87 { background-color: #F5F5F5 !important; }
+body.theme-88 { background-color: #E8E4C9 !important; } body.theme-89 { background-color: #E3DAC9 !important; } body.theme-90 { background-color: #EADDCD !important; }
+body.theme-91 { background-color: #F2E3C6 !important; } body.theme-92 { background-color: #E6D6B8 !important; } body.theme-93 { background-color: #D9C5A0 !important; }
+body.theme-94 { background-color: #CFC291 !important; } body.theme-95 { background-color: #E8E0D5 !important; } body.theme-96 { background-color: #F3E5AB !important; }
+body.theme-97 { background-color: #F4E2C6 !important; } body.theme-98 { background-color: #EFE4D1 !important; } body.theme-99 { background-color: #EAD8C3 !important; }
+body.theme-100 { background-color: #E6DFD3 !important; }
+
+/* Кольори для кружечків прев'ю у меню (Залишаються статичними для краси) */
+.theme-preview { width: 20px; height: 20px; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.3); flex-shrink: 0; }
+.theme-preview.default.liquid { background: linear-gradient(-45deg, #1e3c72, #ee0979); }
+.theme-preview.default.solid { background: #1A2421; }
+
+.theme-preview.liquid.t1 { background: linear-gradient(135deg, #00c6ff, #0072ff); } .theme-preview.liquid.t2 { background: linear-gradient(135deg, #f12711, #f5af19); } .theme-preview.liquid.t3 { background: linear-gradient(135deg, #ff416c, #ff4b2b); } .theme-preview.liquid.t4 { background: linear-gradient(135deg, #8E2DE2, #4A00E0); } .theme-preview.liquid.t5 { background: linear-gradient(135deg, #11998e, #38ef7d); } .theme-preview.liquid.t6 { background: linear-gradient(135deg, #FC466B, #3F5EFB); } .theme-preview.liquid.t7 { background: linear-gradient(135deg, #4568DC, #B06AB3); } .theme-preview.liquid.t8 { background: linear-gradient(135deg, #0f0c29, #302b63, #24243e); } .theme-preview.liquid.t9 { background: linear-gradient(135deg, #00b09b, #96c93d); } .theme-preview.liquid.t10 { background: linear-gradient(135deg, #DCE35B, #45B649); } .theme-preview.liquid.t11 { background: linear-gradient(135deg, #ee0979, #ff6a00); } .theme-preview.liquid.t12 { background: linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b); } .theme-preview.liquid.t13 { background: linear-gradient(135deg, #bdc3c7, #2c3e50); } .theme-preview.liquid.t14 { background: linear-gradient(135deg, #141E30, #243B55); } .theme-preview.liquid.t15 { background: linear-gradient(135deg, #ff9966, #ff5e62); } .theme-preview.liquid.t16 { background: linear-gradient(135deg, #7F00FF, #E100FF); } .theme-preview.liquid.t17 { background: linear-gradient(135deg, #ff9a9e, #fecfef); } .theme-preview.liquid.t18 { background: linear-gradient(135deg, #f6d365, #fda085); } .theme-preview.liquid.t19 { background: linear-gradient(135deg, #84fab0, #8fd3f4); } .theme-preview.liquid.t20 { background: linear-gradient(135deg, #a18cd1, #fbc2eb); } .theme-preview.liquid.t21 { background: linear-gradient(135deg, #ffecd2, #fcb69f); } .theme-preview.liquid.t22 { background: linear-gradient(135deg, #cfd9df, #e2ebf0); } .theme-preview.liquid.t23 { background: linear-gradient(135deg, #a8edea, #fed6e3); } .theme-preview.liquid.t24 { background: linear-gradient(135deg, #f5f7fa, #c3cfe2); } .theme-preview.liquid.t25 { background: linear-gradient(135deg, #e0c3fc, #8ec5fc); } .theme-preview.liquid.t26 { background: linear-gradient(135deg, #f093fb, #f5576c); } .theme-preview.liquid.t27 { background: linear-gradient(135deg, #4facfe, #00f2fe); } .theme-preview.liquid.t28 { background: linear-gradient(135deg, #43e97b, #38f9d7); } .theme-preview.liquid.t29 { background: linear-gradient(135deg, #fa709a, #fee140); } .theme-preview.liquid.t30 { background: linear-gradient(135deg, #667eea, #764ba2); } .theme-preview.liquid.t31 { background: linear-gradient(135deg, #89f7fe, #66a6ff); } .theme-preview.liquid.t32 { background: linear-gradient(135deg, #13547a, #80d0c7); } .theme-preview.liquid.t33 { background: linear-gradient(135deg, #ff0844, #ffb199); } .theme-preview.liquid.t34 { background: linear-gradient(135deg, #b224ef, #7579ff); } .theme-preview.liquid.t35 { background: linear-gradient(135deg, #c471f5, #fa71cd); } .theme-preview.liquid.t36 { background: linear-gradient(135deg, #48c6ef, #6f86d6); } .theme-preview.liquid.t37 { background: linear-gradient(135deg, #feada6, #f5efef); } .theme-preview.liquid.t38 { background: linear-gradient(135deg, #00c6fb, #005bea); } .theme-preview.liquid.t39 { background: linear-gradient(135deg, #0ba360, #3cba92); } .theme-preview.liquid.t40 { background: linear-gradient(135deg, #ff758c, #ff7eb3); } .theme-preview.liquid.t41 { background: linear-gradient(135deg, #209cff, #68e0cf); } .theme-preview.liquid.t42 { background: linear-gradient(135deg, #cd9cf2, #f6f3ff); } .theme-preview.liquid.t43 { background: linear-gradient(135deg, #e6b980, #eacda3); } .theme-preview.liquid.t44 { background: linear-gradient(135deg, #30cfd0, #330867); } .theme-preview.liquid.t45 { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); } .theme-preview.liquid.t46 { background: linear-gradient(135deg, #ffc3a0, #ffafbd); } .theme-preview.liquid.t47 { background: linear-gradient(135deg, #f83600, #f9d423); } .theme-preview.liquid.t48 { background: linear-gradient(135deg, #d4fc79, #96e6a1); } .theme-preview.liquid.t49 { background: linear-gradient(135deg, #845ec2, #d65db1); } .theme-preview.liquid.t50 { background: linear-gradient(135deg, #000000, #434343); }
+
+.theme-preview.solid.t51 { background: #1A2421; } .theme-preview.solid.t52 { background: #24332D; } .theme-preview.solid.t53 { background: #1B262C; } .theme-preview.solid.t54 { background: #0F172A; } .theme-preview.solid.t55 { background: #2E1F27; } .theme-preview.solid.t56 { background: #3E2723; } .theme-preview.solid.t57 { background: #1B1B1B; } .theme-preview.solid.t58 { background: #2F4F4F; } .theme-preview.solid.t59 { background: #4A4036; } .theme-preview.solid.t60 { background: #36454F; } .theme-preview.solid.t61 { background: #2C3539; } .theme-preview.solid.t62 { background: #343434; } .theme-preview.solid.t63 { background: #28282B; } .theme-preview.solid.t64 { background: #3D2B1F; } .theme-preview.solid.t65 { background: #4B3621; } .theme-preview.solid.t66 { background: #191C20; } .theme-preview.solid.t67 { background: #232B2B; } .theme-preview.solid.t68 { background: #353839; } .theme-preview.solid.t69 { background: #252850; } .theme-preview.solid.t70 { background: #123524; } .theme-preview.solid.t71 { background: #1A1110; } .theme-preview.solid.t72 { background: #212121; } .theme-preview.solid.t73 { background: #2C2C2B; } .theme-preview.solid.t74 { background: #181A18; } .theme-preview.solid.t75 { background: #2A2A35; }
+.theme-preview.solid.t76 { background: #F7E7CE; } .theme-preview.solid.t77 { background: #F5F5DC; } .theme-preview.solid.t78 { background: #FAF0E6; } .theme-preview.solid.t79 { background: #FFF8DC; } .theme-preview.solid.t80 { background: #FFE4C4; } .theme-preview.solid.t81 { background: #F5DEB3; } .theme-preview.solid.t82 { background: #FFFACD; } .theme-preview.solid.t83 { background: #F0E68C; } .theme-preview.solid.t84 { background: #EEDD82; } .theme-preview.solid.t85 { background: #D2B48C; } .theme-preview.solid.t86 { background: #DEB887; } .theme-preview.solid.t87 { background: #F5F5F5; } .theme-preview.solid.t88 { background: #E8E4C9; } .theme-preview.solid.t89 { background: #E3DAC9; } .theme-preview.solid.t90 { background: #EADDCD; } .theme-preview.solid.t91 { background: #F2E3C6; } .theme-preview.solid.t92 { background: #E6D6B8; } .theme-preview.solid.t93 { background: #D9C5A0; } .theme-preview.solid.t94 { background: #CFC291; } .theme-preview.solid.t95 { background: #E8E0D5; } .theme-preview.solid.t96 { background: #F3E5AB; } .theme-preview.solid.t97 { background: #F4E2C6; } .theme-preview.solid.t98 { background: #EFE4D1; } .theme-preview.solid.t99 { background: #EAD8C3; } .theme-preview.solid.t100 { background: #E6DFD3; }
+
+/* ================= БАЗОВІ КЛАСИ ================= */
+.glass-panel { border-radius: 20px; transition: all 0.3s ease; }
+.glass-element { transition: all 0.3s ease; }
+.glass-input { color: white; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+.glass-input:focus { outline: none; transform: scale(1.02); }
+.glass-btn { color: white; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease; }
+.glass-btn:hover:not(:disabled) { transform: translateY(-2px); }
+.glass-btn:active:not(:disabled) { transform: scale(0.9) translateY(0) !important; }
+
+/* ================= ПОЗИЦІОНУВАННЯ ТА БІЧНА ПАНЕЛЬ ================= */
+.main-container { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 60px 20px; box-sizing: border-box; position: relative; min-height: max-content; z-index: 5; }
+.main-title { margin-bottom: 20px; font-size: 38px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 100%; }
+
+.layout-wrapper { display: flex; justify-content: center; width: 100%; max-width: 650px; position: relative; }
+
+.chat-sidebar { 
+    position: absolute; 
+    right: calc(100% + 15px); 
+    top: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    flex-wrap: wrap; 
+    align-content: flex-end; 
+    gap: 15px; 
+    padding: 0; 
+    z-index: 100;
+    max-height: 250px; 
+    width: 80px; 
+}
+
+.chat-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); padding: 0; outline: none; position: relative; z-index: 101; flex-shrink: 0; }
+.chat-dot:hover { transform: scale(1.2); }
+@keyframes scaleOut { to { transform: scale(0); opacity: 0; } }
+.chat-dot.deleting { animation: scaleOut 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; pointer-events: none; }
+
+.add-chat-btn { background: none; border: none; color: inherit; cursor: pointer; font-size: 20px; opacity: 0.5; transition: 0.3s; padding: 0; display: flex; align-items: center; justify-content: center; width: 16px; }
+.add-chat-btn:hover { opacity: 1; transform: scale(1.2); }
+.add-chat-btn i { transition: transform 0.3s ease; }
+.add-chat-btn:hover i { transform: rotate(90deg); }
+
+.wrapper { display: flex; flex-direction: column; width: 100%; flex: 1; padding: 30px; padding-bottom: 40px; box-sizing: border-box; position: relative; height: auto; min-height: fit-content; z-index: 10; }
+#chatTitle { text-align: center; font-size: 28px; font-weight: 700; color: inherit; margin: 0 0 25px 0; padding: 5px 10px; border: none; background: transparent; outline: none; border-radius: 8px; transition: background 0.3s; cursor: text; }
+#chatTitle:hover, #chatTitle:focus { background: rgba(255,255,255,0.05); }
+
+/* ================= TOOLTIPS ================= */
+[data-tooltip], [data-tooltip-bottom] { position: relative; z-index: 50; }
+[data-tooltip]::after, [data-tooltip-bottom]::after { position: absolute; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); color: white; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: normal; width: max-content; max-width: 200px; text-align: center; line-height: 1.3; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+[data-tooltip]::before, [data-tooltip-bottom]::before { content: ''; position: absolute; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10000; border-style: solid; }
+[data-tooltip]:hover::after, [data-tooltip-bottom]:hover::after, [data-tooltip]:hover::before, [data-tooltip-bottom]:hover::before { opacity: 1; transition-delay: 1s; }
+[data-tooltip]::after { content: attr(data-tooltip); bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%); }
+[data-tooltip]::before { bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); border-width: 6px 6px 0; border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent; }
+#settingsBtn[data-tooltip-bottom]::after { content: attr(data-tooltip-bottom); top: calc(100% + 12px); left: 0; transform: translateX(0); }
+#settingsBtn[data-tooltip-bottom]::before { top: calc(100% + 6px); left: 22px; transform: translateX(-50%); border-width: 0 6px 6px; border-color: transparent transparent rgba(0, 0, 0, 0.85) transparent; }
+
+/* ================= НАЛАШТУВАННЯ ТА МЕНЮ (ДЕСКТОП) ================= */
+.settings-menu-container { position: fixed; top: 20px; left: 20px; z-index: 3000; }
+.settings-btn { border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 26px; padding: 0; position: relative; z-index: 3010; }
+.settings-dropdown { position: absolute; top: 100%; left: 0; margin-top: 10px; border-radius: 16px; padding: 15px; display: none; flex-direction: column; gap: 15px; min-width: 240px; opacity: 0; transform: translateY(-15px) scale(0.95); transform-origin: top left; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 3005; }
+.settings-dropdown.active { display: flex; opacity: 1; transform: translateY(0) scale(1); }
+.settings-item { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: inherit; font-weight: 500; position: relative; }
+.settings-divider { height: 1px; background: rgba(0,0,0,0.1); margin: 5px 0; width: 100%; }
+.language-btn { width: 100%; display: flex; justify-content: flex-start; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; margin-bottom: 5px; }
+.toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.2); transition: .4s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 34px; border: 1px solid rgba(0,0,0,0.1); }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 2px; bottom: 2px; background-color: white; transition: .4s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+input:checked + .slider { background-color: #4CAF50; border-color: #4CAF50; }
+input:checked + .slider:before { transform: translateX(20px); }
+
+.solid-dropdown { position: absolute; top: 0; left: 105%; border-radius: 16px; display: none; flex-direction: column; min-width: 240px; max-height: 350px; opacity: 0; transform: translateX(-15px) scale(0.95); transform-origin: left top; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); overflow: hidden; z-index: 3020; }
+.solid-dropdown.active { display: flex; opacity: 1; transform: translateX(0) scale(1); }
+.language-search-container { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+.language-search { width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); color: inherit; outline: none; transition: 0.2s; box-sizing: border-box; font-weight: 500; }
+.language-list, .theme-list { max-height: 280px; overflow-y: auto; overflow-x: hidden; padding: 8px; flex: 1; }
+.language-list button, .theme-list button { display: flex; align-items: center; gap: 12px; background: transparent; border: none; color: inherit; padding: 10px 14px; cursor: pointer; text-align: left; font-size: 14px; width: 100%; border-radius: 8px; font-weight: 500; transition: background 0.2s; margin-bottom: 2px; }
+.language-list button:hover, .theme-list button:hover { background: rgba(0,0,0,0.05); }
+.language-list button.selected, .theme-list button.selected { background: rgba(0,0,0,0.1); font-weight: 700; }
+
+/* ================= СПОВІЩЕННЯ ================= */
+.toast-indicator { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); padding: 12px 25px; border-radius: 12px; font-weight: 600; font-size: 14px; opacity: 0; transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 10000; }
+#connectedIndicator { background: rgba(76, 175, 80, 0.9); color: white; }
+#copiedIndicator { background: rgba(33, 150, 243, 0.9); color: white; }
+#disconnectedIndicator { background: rgba(244, 67, 54, 0.9); color: white; }
+#limitIndicator { background: rgba(255, 152, 0, 0.95); color: white; }
+
+/* ================= ІНТЕРФЕЙС ТУДУЛІСТА ================= */
+.input-container { display: flex; gap: 15px; width: 100%; margin-bottom: 20px; }
+textarea#text { flex: 1; min-height: 50px; max-height: 150px; font-size: 18px; padding: 12px 18px; border-radius: 12px; resize: none; font-family: inherit; z-index: 10; }
+button#btn { border-radius: 12px; width: 60px; height: 60px; font-size: 24px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; z-index: 10; }
+
+.share-toggle-btn { border-radius: 12px; padding: 15px; font-size: 18px; font-weight: bold; margin-bottom: 15px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; z-index: 10; }
+.share-panel { width: 100%; overflow: hidden; opacity: 0; max-height: 0; padding-top: 0; padding-bottom: 0; margin-bottom: 0; border-width: 0; transform: scaleY(0.9) translateY(-10px); transform-origin: top center; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); box-sizing: border-box; }
+.share-panel.open { max-height: 500px; padding: 25px; margin-bottom: 15px; border-width: 1px; opacity: 1; transform: scaleY(1) translateY(0); }
+.peer-section { display: flex; flex-direction: column; gap: 20px; }
+.id-container, .connect-container { display: flex; flex-direction: column; gap: 10px; }
+.id-container label, .connect-container label { font-weight: 600; font-size: 14px; }
+.id-display { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; }
+#myPeerId { flex: 1; font-family: monospace; font-size: 15px; word-break: break-all; font-weight: 500; }
+.icon-btn { border-radius: 8px; padding: 8px 12px; font-size: 14px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.connect-inputs { display: flex; gap: 10px; width: 100%; }
+#friendIdInput { flex: 1; padding: 12px 16px; border-radius: 10px; font-size: 14px; min-width: 120px; }
+.connection-buttons { display: flex; gap: 15px; flex-shrink: 0; align-items: center; margin-right: 20px; }
+.connect-btn, .disconnect-btn { border-radius: 10px; padding: 0; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.connect-btn:disabled, .disconnect-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+
+ul#todolist { width: 100%; padding: 0; list-style: none; margin-top: 10px; display: flex; flex-direction: column; gap: 12px; transition: opacity 0.3s ease, transform 0.3s ease; }
+li { display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-radius: 14px; font-size: 20px; position: relative; opacity: 1; box-sizing: border-box; transform-origin: center top; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease; z-index: 1; }
+li:hover { transform: translateY(-3px); z-index: 10; }
+li.editing { transform: scale(1.02); z-index: 11; }
+
+@keyframes expandIn { 0% { max-height: 0; padding: 0; opacity: 0; transform: translateX(-30px); border-width: 0; margin-top: -12px; overflow: hidden; } 50% { max-height: 150px; padding: 18px 24px; opacity: 0.5; transform: translateX(10px); border-width: 1px; margin-top: 0; overflow: hidden; } 100% { max-height: 500px; padding: 18px 24px; opacity: 1; transform: translateX(0); border-width: 1px; margin-top: 0; overflow: visible; } }
+li.new-item { animation: expandIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+@keyframes slideOutRight { 0% { opacity: 1; transform: translateX(0); } 100% { opacity: 0; transform: translateX(100px); } }
+li.deleting { animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important; pointer-events: none; }
+li.collapsing { transition: height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.4s ease, border-width 0.4s ease, margin 0.4s ease !important; overflow: hidden !important; min-height: 0 !important; }
+
+.edit-textarea { flex: 1; height: 120px; min-height: 120px; max-height: 120px; border-radius: 10px; font-size: 18px; padding: 14px; outline: none; resize: none; font-family: inherit; overflow-y: auto; text-align: left; animation: textareaAppear 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+@keyframes textareaAppear { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes contentAppear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+.todo-content { flex: 1; word-break: break-word; padding-right: 12px; display: flex; align-items: center; white-space: pre-wrap; animation: contentAppear 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+.todo-content.completed { text-decoration: line-through; }
+.edit-btn, .save-btn { border-radius: 10px; width: 45px; height: 45px; margin-left: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.version-tag { position: fixed; bottom: 15px; right: 20px; opacity: 0.35; font-size: 14px; font-weight: 700; letter-spacing: 1px; pointer-events: none; z-index: 0; }
+
+/* ==================== АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНІВ ==================== */
 @media (max-width: 768px) { 
-    .main-container {
-        padding: 25px 0;
+    .main-container { padding: 80px 10px 40px 10px; } 
+    .layout-wrapper { flex-direction: column; align-items: center; width: 100%; position: static; }
+    
+    .chat-sidebar { 
+        position: static; 
+        flex-direction: row; 
+        flex-wrap: wrap; 
+        justify-content: center; 
+        align-content: flex-start; 
+        width: 100%; 
+        max-height: none; 
+        padding: 10px 15px 25px; 
     }
     
-    textarea#text { 
-        min-height: 45px; 
-        height: 45px; 
-        max-height: 45px; 
-        font-size: 16px; 
-        padding: 10px 14px; 
-    } 
+    .chat-dot { flex-shrink: 0; }
+    .main-title { font-size: 32px; margin-bottom: 5px; }
     
-    button#btn { 
-        width: 50px; 
-        height: 50px; 
-        font-size: 24px; 
-    } 
+    .settings-menu-container { top: 15px; left: 15px; }
+    .settings-btn { width: 38px; height: 38px; font-size: 22px; z-index: 3000; }
     
-    .share-toggle-btn { 
-        padding: 12px 16px; 
-        font-size: 16px; 
-    } 
-    
-    .wrapper { 
-        padding: 0 15px; 
-        max-width: 500px; 
-    } 
-    
-    h1 { 
-        font-size: 24px; 
-    } 
-    
-    .language-switcher { 
-        top: 15px; 
-        right: 15px; 
+    .settings-dropdown { 
+        position: fixed !important; top: 60px !important; left: 15px !important; bottom: auto !important;
+        width: auto !important; min-width: 200px !important; max-width: 85vw !important; margin: 0; 
+        border-radius: 12px !important; 
+        padding: 12px !important; 
+        transform: translateY(-10px) scale(0.95) !important; 
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
+        z-index: 3005;
+        gap: 10px !important;
     }
+    .settings-dropdown.active { transform: translateY(0) scale(1) !important; }
     
-    .language-btn {
-        min-width: 70px;
-        font-size: 13px;
+    .solid-dropdown { 
+        position: fixed !important; top: 60px !important; left: 15px !important; bottom: auto !important;
+        width: auto !important; min-width: 220px !important; max-width: 90vw !important; 
+        border-radius: 12px !important; 
+        padding: 12px !important; 
+        transform: translateX(-10px) scale(0.95) !important; 
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5) !important;
+        z-index: 3010;
     }
-    
-    .language-dropdown {
-        min-width: 200px;
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%) scale(0.95);
-        width: 90%;
-        max-width: 300px;
-        max-height: 70vh;
-    }
-    
-    .language-dropdown.active {
-        transform: translate(-50%, -50%) scale(1);
-    }
-    
-    .language-dropdown.hiding {
-        transform: translate(-50%, -50%) scale(0.95);
-    }
-    
-    .language-search-container {
-        padding: 10px 12px 8px 12px;
-    }
-    
-    .language-search {
-        padding: 8px 12px;
-    }
-    
-    .language-list button {
-        padding: 10px 15px;
-        margin: 2px 4px;
-    }
-    
-    /* Адаптація збільшеного вікна редагування для мобільних */
-    .edit-textarea {
-        min-height: 70px;
-        padding: 14px 16px;
-        font-size: 16px;
-    }
-    
-    /* Адаптація панелі спільного доступу */
-    .share-panel.open {
-        padding: 20px;
-        max-height: 380px;
-    }
-    
-    .peer-section {
-        gap: 20px;
-    }
-    
-    .id-container, .connect-container {
-        gap: 10px;
-    }
-    
-    /* Виправлення для кнопок підключення на планшетах */
-    .connect-inputs {
-        gap: 8px;
-    }
-    
-    #friendIdInput {
-        min-width: 100px;
-    }
+    .solid-dropdown.active { transform: translateX(0) scale(1) !important; }
+
+    .settings-item { font-size: 14px; gap: 10px; }
+    .toggle-switch { width: 36px; height: 20px; }
+    .slider:before { height: 16px; width: 16px; left: 2px; bottom: 1px; }
+    input:checked + .slider:before { transform: translateX(16px); }
+    .language-btn { padding: 10px; font-size: 14px; border-radius: 8px; margin-bottom: 5px;}
+    .language-search-container { padding: 8px 10px; }
+    .language-search { padding: 6px 10px; font-size: 13px; border-radius: 8px; }
+    .language-list, .theme-list { max-height: 250px; padding: 4px; }
+    .language-list button, .theme-list button { padding: 8px 10px; font-size: 13px; gap: 10px; border-radius: 6px; margin-bottom: 2px;}
+    .theme-preview { width: 16px; height: 16px; }
+
+    .wrapper { padding: 20px 15px; border-radius: 16px; width: 100%; }
+    #chatTitle { font-size: 24px; margin-bottom: 15px; }
+    textarea#text { font-size: 16px; min-height: 45px; height: 45px; max-height: 45px; padding: 10px 14px; }
+    button#btn { width: 45px; height: 45px; font-size: 20px; border-radius: 10px; }
+    li { padding: 14px 16px; font-size: 16px; border-radius: 12px; }
+    .edit-btn, .save-btn { width: 38px; height: 38px; font-size: 18px; margin-left: 8px; }
+    .connection-buttons { margin-right: 35px !important; }
+    .disconnect-btn { margin-left: 0 !important; } 
+    [data-tooltip]::after, [data-tooltip]::before, [data-tooltip-bottom]::after, [data-tooltip-bottom]::before { display: none !important; }
 }
 
-/* Мобільні пристрої */
-@media (max-width: 480px) { 
-    .main-container {
-        padding: 20px 0;
-    }
+@media (max-width: 380px) {
+    .settings-menu-container { top: 10px; left: 10px; }
+    .settings-btn { width: 34px; height: 34px; font-size: 20px; }
     
-    textarea#text { 
-        min-height: 40px; 
-        height: 40px; 
-        max-height: 40px; 
-        font-size: 14px; 
-        padding: 8px 12px; 
-    } 
+    .settings-dropdown { top: 52px !important; left: 10px !important; min-width: 180px !important; padding: 10px !important; }
+    .solid-dropdown { top: 52px !important; left: 10px !important; min-width: 200px !important; padding: 10px !important; }
     
-    button#btn { 
-        width: 45px; 
-        height: 45px; 
-        font-size: 20px; 
-    } 
-    
-    .share-toggle-btn { 
-        padding: 10px 14px; 
-        font-size: 14px; 
-    } 
-    
-    .wrapper { 
-        padding: 0 10px; 
-        max-width: 400px; 
-    } 
-    
-    h1 { 
-        font-size: 22px; 
-    } 
-    
-    li { 
-        padding: 14px 18px; 
-        font-size: 16px; 
-    } 
-    
-    .share-panel.open { 
-        padding: 15px; 
-        max-height: 360px;
-    } 
-    
-    .language-switcher { 
-        top: 10px; 
-        right: 10px; 
-    }
-    
-    .language-btn { 
-        padding: 8px 12px; 
-        font-size: 12px; 
-        min-width: 60px;
-    }
-    
-    .language-dropdown { 
-        min-width: 180px; 
-        width: 85%;
-    }
-    
-    .language-search-container {
-        padding: 8px 10px 6px 10px;
-    }
-    
-    .language-search {
-        padding: 7px 10px;
-        font-size: 13px;
-    }
-    
-    .language-list button {
-        padding: 9px 13px;
-        font-size: 13px;
-        margin: 2px 3px;
-    }
-    
-    /* Адаптація збільшеного вікна редагування для маленьких екранів */
-    .edit-textarea {
-        min-height: 60px;
-        padding: 12px 14px;
-        font-size: 15px;
-    }
-    
-    /* Адаптація панелі спільного доступу */
-    .peer-section {
-        gap: 15px;
-    }
-    
-    .id-display, #friendIdInput {
-        padding: 12px 14px;
-    }
-    
-    /* ВИПРАВЛЕННЯ ДЛЯ МОБІЛЬНИХ - КНОПКИ ЗАЛИШАЮТЬСЯ В РЯДКУ */
-    .connect-inputs {
-        flex-wrap: nowrap;
-        gap: 8px;
-    }
-    
-    #friendIdInput {
-        min-width: 80px;
-        font-size: 13px;
-        padding: 12px 10px;
-    }
-    
-    .connection-buttons {
-        flex-shrink: 0;
-    }
-    
-    .connect-btn, .disconnect-btn {
-        min-width: 40px;
-        width: 40px;
-        height: 40px;
-        padding: 8px;
-    }
-    
-    .id-display {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-    }
-    
-    .icon-btn {
-        justify-content: center;
-    }
-}
+    .settings-item { font-size: 13px; }
+    .language-btn { padding: 8px; font-size: 13px; }
+    .language-search { padding: 5px 8px; font-size: 12px; }
+    .language-list button, .theme-list button { padding: 6px 8px; font-size: 12px; gap: 8px; }
+    .theme-preview { width: 14px; height: 14px; }
+    .language-list, .theme-list { max-height: 220px; }
 
-/* Великі монітори */
-@media (min-width: 1200px) { 
-    .wrapper { 
-        max-width: 700px; 
-    } 
+    .share-panel.open { padding: 15px 12px; }
+    #friendIdInput { min-width: 50px; padding: 10px; font-size: 13px; }
+    .connection-buttons { gap: 8px; margin-right: 8px !important; }
+    .connect-btn, .disconnect-btn { width: 38px; height: 38px; font-size: 18px; }
     
-    body { 
-        font-size: 18px; 
-    } 
-    
-    textarea#text { 
-        font-size: 20px; 
-        min-height: 55px; 
-        height: 55px; 
-        max-height: 55px; 
-    } 
-    
-    li { 
-        font-size: 22px; 
-        padding: 20px 28px; 
-    } 
-    
-    .share-toggle-btn { 
-        font-size: 20px; 
-        padding: 18px 24px; 
-    } 
-    
-    /* Ще більше вікно редагування для великих екранів */
-    .edit-textarea {
-        min-height: 90px;
-        padding: 18px 22px;
-        font-size: 20px;
-    }
-}
-
-/* Дуже маленькі екрани */
-@media (max-width: 320px) {
-    .main-container {
-        padding: 15px 0;
-    }
-    
-    .language-btn {
-        padding: 6px 10px;
-        font-size: 11px;
-        min-width: 55px;
-    }
-    
-    .language-dropdown {
-        min-width: 170px;
-        width: 80%;
-    }
-    
-    .language-search-container {
-        padding: 6px 8px 4px 8px;
-    }
-    
-    .language-search {
-        padding: 6px 8px;
-        font-size: 12px;
-    }
-    
-    .language-list button {
-        font-size: 12px;
-        padding: 8px 10px;
-        margin: 1px 2px;
-    }
-    
-    .wrapper {
-        padding: 0 5px;
-    }
-    
-    textarea#text {
-        font-size: 13px;
-        padding: 6px 10px;
-    }
-    
-    /* Мінімальне вікно редагування для дуже маленьких екранів */
-    .edit-textarea {
-        min-height: 50px;
-        padding: 10px 12px;
-        font-size: 14px;
-    }
-    
-    .share-panel.open {
-        padding: 12px;
-        max-height: 340px;
-    }
-    
-    /* ВИПРАВЛЕННЯ ДЛЯ ДУЖЕ МАЛИХ ЕКРАНІВ */
-    .connect-inputs {
-        gap: 6px;
-    }
-    
-    #friendIdInput {
-        min-width: 60px;
-        font-size: 12px;
-        padding: 10px 8px;
-    }
-    
-    .connection-buttons {
-        gap: 4px;
-    }
-    
-    .connect-btn, .disconnect-btn {
-        min-width: 35px;
-        width: 35px;
-        height: 35px;
-        padding: 6px;
-        font-size: 14px;
-    }
-}
-
-/* Високі екрани */
-@media (min-height: 800px) and (min-width: 1024px) {
-    .main-container {
-        padding: 40px 0;
-    }
-    
-    .language-switcher {
-        top: 25px;
-        right: 25px;
-    }
-    
-    .language-dropdown {
-        max-height: 500px;
-    }
-    
-    .language-list {
-        max-height: 400px;
-    }
-    
-    .language-list button {
-        padding: 14px 20px;
-    }
-    
-    /* Більше місця для редагування на високих екранах */
-    .edit-textarea {
-        min-height: 100px;
-        max-height: 250px;
-    }
+    .main-container { padding-top: 55px; }
+    .main-title { font-size: 26px; }
 }
