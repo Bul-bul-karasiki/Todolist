@@ -1,121 +1,153 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Todo List</title>
-   <link rel="icon" href="https://blog.lulu.com/content/images/2024/12/072120-ToDoList-Blog.png" type="image/png">
+    <link rel="icon" href="https://blog.lulu.com/content/images/2024/12/072120-ToDoList-Blog.png" type="image/png">
     <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 </head>
 <body class="liquid-glass theme-default">
+
     <div id="connectedIndicator" class="toast-indicator"></div>
     <div id="copiedIndicator" class="toast-indicator"></div>
     <div id="disconnectedIndicator" class="toast-indicator"></div>
     <div id="limitIndicator" class="toast-indicator"></div>
-
-    <div class="settings-menu-container">
-        <button id="settingsBtn" class="settings-btn glass-btn" data-tooltip-bottom="Налаштування"><i class="ph ph-gear"></i></button>
-        <div id="settingsDropdown" class="settings-dropdown glass-panel">
-            <div class="settings-item">
-                <span id="darkModeLabel">Темний режим</span>
-                <label class="toggle-switch">
+    <div id="actionIndicator" class="toast-indicator"></div>
+    <div id="pinIndicator" class="toast-indicator"></div> <div class="settings-menu-container">
+        <button class="settings-btn glass-btn" id="settingsBtn" data-tooltip-bottom="Settings">
+            <i class="ph ph-gear"></i>
+        </button>
+        <div class="settings-dropdown glass-panel" id="settingsDropdown">
+            <button class="language-btn glass-btn" id="langBtn" data-tooltip=""></button>
+            <button class="language-btn glass-btn" id="themeBtn" data-tooltip=""></button>
+            
+            <button class="language-btn glass-btn" id="shareMenuBtn" data-tooltip="">
+                <div style="display:flex; align-items:center; gap:10px;"><i class="ph ph-broadcast"></i> <span id="shareBtnMenuText">Shared access</span></div>
+                <i class="ph ph-caret-right" style="margin-left: auto;"></i>
+            </button>
+            
+            <button class="language-btn glass-btn" id="darkModeBtn" data-tooltip="">
+                <div style="display:flex; align-items:center; gap:10px;"><i class="ph ph-moon"></i> <span id="darkModeLabel">Dark mode</span></div>
+                <label class="toggle-switch" style="margin-left:auto; pointer-events:none;">
                     <input type="checkbox" id="darkModeToggle">
                     <span class="slider"></span>
                 </label>
-            </div>
-            <div class="settings-item">
-                <span id="staticBgLabel">Статичний фон</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="freezeBgToggle">
+            </button>
+            <button class="language-btn glass-btn" id="liquidGlassBtn" data-tooltip="">
+                <div style="display:flex; align-items:center; gap:10px;"><i class="ph ph-drop"></i> <span id="liquidGlassLabel">Liquid glass</span></div>
+                <label class="toggle-switch" style="margin-left:auto; pointer-events:none;">
+                    <input type="checkbox" id="liquidGlassToggle">
                     <span class="slider"></span>
                 </label>
-            </div>
-            <div class="settings-item">
-                <span id="liquidGlassLabel">Скляний дизайн</span>
-                <label class="toggle-switch">
-                    <input type="checkbox" id="liquidGlassToggle" checked>
+            </button>
+            <button class="language-btn glass-btn" id="staticBgBtn" style="display: flex;" data-tooltip="">
+                <div style="display:flex; align-items:center; gap:10px;"><i class="ph ph-image"></i> <span id="staticBgLabel">Static background</span></div>
+                <label class="toggle-switch" style="margin-left:auto; pointer-events:none;">
+                    <input type="checkbox" id="staticBgToggle">
                     <span class="slider"></span>
                 </label>
-            </div>
-            <div class="settings-divider"></div>
-            <button id="langBtn" class="language-btn glass-btn"><i class="ph ph-translate"></i> <span>Мова</span> <i class="ph ph-caret-right" style="margin-left: auto;"></i></button>
-            <button id="themeBtn" class="language-btn glass-btn"><i class="ph ph-palette"></i> <span>Інші теми</span> <i class="ph ph-caret-right" style="margin-left: auto;"></i></button>
+            </button>
         </div>
-        
-        <div id="languageDropdown" class="solid-dropdown">
+
+        <div class="solid-dropdown glass-panel" id="languageDropdown">
             <div class="language-search-container">
-                <input type="text" id="langSearch" class="language-search" placeholder="Пошук...">
+                <input type="text" class="language-search glass-input" id="langSearch" placeholder="Search...">
             </div>
-            <div id="langList" class="language-list">
-                <button data-lang="uk">Українська</button>
-                <button data-lang="en">English</button>
-                <button data-lang="ru">Русский</button>
-                <button data-lang="pl">Polski</button>
-                <button data-lang="de">Deutsch</button>
-                <button data-lang="fr">Français</button>
-                <button data-lang="es">Español</button>
-                <button data-lang="pt">Português</button>
-                <button data-lang="it">Italiano</button>
-                <button data-lang="nl">Nederlands</button>
-                <button data-lang="sv">Svenska</button>
-                <button data-lang="tr">Türkçe</button>
-                <button data-lang="bg">Български</button>
-                <button data-lang="ar">العربية</button>
-                <button data-lang="zh">中文</button>
-                <button data-lang="ja">日本語</button>
-                <button data-lang="ko">한국어</button>
-                <button data-lang="hi">हिन्दी</button>
+            <div class="language-list" id="langList">
+                <button data-lang="ar">🇸🇦 العربية</button>
+                <button data-lang="bg">🇧🇬 Български</button>
+                <button data-lang="de">🇩🇪 Deutsch</button>
+                <button data-lang="en" class="selected">🇬🇧 English</button>
+                <button data-lang="es">🇪🇸 Español</button>
+                <button data-lang="fr">🇫🇷 Français</button>
+                <button data-lang="it">🇮🇹 Italiano</button>
+                <button data-lang="nl">🇳🇱 Nederlands</button>
+                <button data-lang="pl">🇵🇱 Polski</button>
+                <button data-lang="pt">🇵🇹 Português</button>
+                <button data-lang="ru">🇷🇺 Русский</button>
+                <button data-lang="sv">🇸🇪 Svenska</button>
+                <button data-lang="tr">🇹🇷 Türkçe</button>
+                <button data-lang="uk">🇺🇦 Українська</button>
+                <button data-lang="hi">🇮🇳 हिन्दी</button>
+                <button data-lang="ja">🇯🇵 日本語</button>
+                <button data-lang="zh">🇨🇳 中文</button>
+                <button data-lang="ko">🇰🇷 한국어</button>
             </div>
         </div>
 
-        <div id="themeDropdown" class="solid-dropdown">
-            <div id="themeList" class="theme-list"></div>
+        <div class="solid-dropdown glass-panel" id="themeDropdown">
+            <div class="theme-list" id="themeList"></div>
+        </div>
+
+        <div class="solid-dropdown glass-panel" id="shareDropdown" style="padding: 20px; min-width: 280px;">
+            <h3 style="margin-top: 0; margin-bottom: 20px; font-weight: 600; text-align: center; font-size: 16px;">
+                <i class="ph ph-broadcast"></i> <span id="shareModalTitle">Shared access</span>
+            </h3>
+            <div class="peer-section">
+                <div class="id-container">
+                    <label id="yourIdLabel">Your ID:</label>
+                    <div class="id-display glass-input">
+                        <span id="myPeerId">Loading...</span>
+                        <button id="copyIdBtn" class="glass-btn icon-btn-text" data-tooltip="Copy ID">
+                            <i class="ph ph-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="connect-container" style="margin-top: 15px;">
+                    <label id="connectFriendLabel">Connect to friend:</label>
+                    <div class="connect-inputs">
+                        <input type="text" id="friendIdInput" class="glass-input" placeholder="Enter friend's ID">
+                        <div class="connection-buttons">
+                            <button id="connectBtn" class="glass-btn connect-btn" data-tooltip="Connect"><i class="ph ph-link"></i></button>
+                            <button id="disconnectBtn" class="glass-btn disconnect-btn" data-tooltip="Disconnect" disabled><i class="ph ph-plugs"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
     <div class="main-container">
-        <h1 id="mainAppTitle" class="main-title">Todo list</h1>
+        <h1 class="main-title" id="mainAppTitle">Todo list</h1>
         
         <div class="layout-wrapper">
-            <div id="chatSidebar" class="chat-sidebar"></div>
+            <div class="chat-sidebar" id="chatSidebar"></div>
             
             <div class="wrapper glass-panel">
-                <h2 id="chatTitle" contenteditable="true" spellcheck="false" data-tooltip="Натисніть, щоб змінити назву"></h2>
+                <input type="text" id="chatTitle" value="Chat 1" spellcheck="false" data-tooltip="">
                 
-                <div class="input-container">
-                    <textarea id="text" class="glass-input" placeholder="Додайте справу"></textarea>
-                    <button id="btn" class="glass-btn" data-tooltip="Додати"><i class="ph ph-plus"></i></button>
-                </div>
-
-                <button id="shareToggleBtn" class="share-toggle-btn glass-btn" data-tooltip="Меню підключення"><i class="ph ph-broadcast"></i> Спільний доступ</button>
-                <div id="sharePanel" class="share-panel">
-                    <div class="peer-section">
-                        <div class="id-container">
-                            <label id="yourIdLabel">Твій ID:</label>
-                            <div class="id-display glass-input">
-                                <span id="myPeerId">Завантаження...</span>
-                                <button id="copyIdBtn" class="icon-btn glass-btn" data-tooltip="Копіювати свій ID"><i class="ph ph-copy"></i> Копіювати</button>
+                <div class="inner-chat-bg">
+                    <div class="top-action-panel">
+                        <div class="chat-input-wrapper glass-input">
+                            <div id="imagePreviews" class="image-previews"></div>
+                            <div class="input-row">
+                                <button id="photoAttachBtn" class="icon-btn attach-clip" data-tooltip="">
+                                    <i class="ph ph-paperclip"></i>
+                                </button>
+                                <textarea id="text" placeholder="Write a message..." rows="1"></textarea>
+                                <button id="btn" class="send-btn glass-btn" data-tooltip="">
+                                    <i class="ph ph-paper-plane-right"></i>
+                                </button>
                             </div>
                         </div>
-                        <div class="connect-container">
-                            <label id="connectFriendLabel">Підключитись до друга:</label>
-                            <div class="connect-inputs">
-                                <input type="text" id="friendIdInput" class="glass-input" placeholder="Введіть ID друга">
-                                <div class="connection-buttons">
-                                    <button id="connectBtn" class="connect-btn glass-btn" data-tooltip="Підключити"><i class="ph ph-link"></i></button>
-                                    <button id="disconnectBtn" class="disconnect-btn glass-btn" data-tooltip="Відключити" disabled><i class="ph ph-link-break"></i></button>
-                                </div>
-                            </div>
-                        </div>
+                        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
                     </div>
-                </div>
 
-                <ul id="todolist"></ul>
+                    <ul id="todolist"></ul>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="image-modal" id="imageModal">
+        <button class="modal-close glass-btn" id="closeModalBtn" data-tooltip="Close"><i class="ph ph-x"></i></button>
+        <img id="modalImg" src="" alt="Full screen image">
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
