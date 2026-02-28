@@ -17,7 +17,9 @@
     <div id="disconnectedIndicator" class="toast-indicator"></div>
     <div id="limitIndicator" class="toast-indicator"></div>
     <div id="actionIndicator" class="toast-indicator"></div>
-    <div id="pinIndicator" class="toast-indicator"></div> <div class="settings-menu-container">
+    <div id="pinIndicator" class="toast-indicator"></div>
+
+    <div class="settings-menu-container">
         <button class="settings-btn glass-btn" id="settingsBtn" data-tooltip-bottom="Settings">
             <i class="ph ph-gear"></i>
         </button>
@@ -146,6 +148,23 @@
     <div class="image-modal" id="imageModal">
         <button class="modal-close glass-btn" id="closeModalBtn" data-tooltip="Close"><i class="ph ph-x"></i></button>
         <img id="modalImg" src="" alt="Full screen image">
+    </div>
+
+    <div class="overlay-modal" id="shareChoiceModal">
+        <div class="glass-panel modal-content">
+            <h3 id="shareChoiceTitle" style="margin-top: 0; margin-bottom: 20px;">Connection type</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="glass-btn action-btn" id="btnShareNew">
+                    <i class="ph ph-plus-circle"></i> <span id="textShareNew">Create new shared chat</span>
+                </button>
+                <button class="glass-btn action-btn" id="btnShareCurrent">
+                    <i class="ph ph-chat-circle"></i> <span id="textShareCurrent">Continue in current</span>
+                </button>
+                <button class="glass-btn" id="btnShareCancel" style="margin-top: 5px; opacity: 0.7; padding: 10px; border-radius: 12px; border: none;">
+                    Cancel
+                </button>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
