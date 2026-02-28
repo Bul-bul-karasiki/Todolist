@@ -21,11 +21,8 @@ body.dark-mode.light-theme-active::before { background: rgba(0,0,0, 0.75); }
 body::after { content: ''; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1999; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
 body.menu-open::after { opacity: 1; pointer-events: auto; }
 
-/* ================= АНІМАЦІЇ ТА ТЕМИ ================= */
 @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 body.liquid-glass { background-size: 150% 150% !important; animation: gradientBG 15s ease infinite !important; background-attachment: fixed !important; will-change: background-position; }
-
-/* Оптимізація лагів Liquid Glass під час Drag & Drop */
 body.is-dragging-global.liquid-glass { animation-play-state: paused !important; }
 
 body.theme-default, .theme-preview.default.liquid { background-image: linear-gradient(-45deg, #1e3c72, #2a5298, #ff6a00, #ee0979) !important; background-color: #1e3c72; }
@@ -81,28 +78,19 @@ body.theme-49, .theme-preview.liquid.t49 { background-image: linear-gradient(-45
 body.theme-50, .theme-preview.liquid.t50 { background-image: linear-gradient(-45deg, #000000, #434343) !important; }
 
 .theme-preview.solid.t51 { background: #1A2421; } .theme-preview.solid.t52 { background: #24332D; } .theme-preview.solid.t53 { background: #1B262C; } .theme-preview.solid.t54 { background: #0F172A; } .theme-preview.solid.t55 { background: #2E1F27; } .theme-preview.solid.t56 { background: #3E2723; } .theme-preview.solid.t57 { background: #1B1B1B; } .theme-preview.solid.t58 { background: #2F4F4F; } .theme-preview.solid.t59 { background: #4A4036; } .theme-preview.solid.t60 { background: #36454F; } .theme-preview.solid.t61 { background: #2C3539; } .theme-preview.solid.t62 { background: #343434; } .theme-preview.solid.t63 { background: #28282B; } .theme-preview.solid.t64 { background: #3D2B1F; } .theme-preview.solid.t65 { background: #4B3621; } .theme-preview.solid.t66 { background: #191C20; } .theme-preview.solid.t67 { background: #232B2B; } .theme-preview.solid.t68 { background: #353839; } .theme-preview.solid.t69 { background: #252850; } .theme-preview.solid.t70 { background: #123524; } .theme-preview.solid.t71 { background: #1A1110; } .theme-preview.solid.t72 { background: #212121; } .theme-preview.solid.t73 { background: #2C2C2B; } .theme-preview.solid.t74 { background: #181A18; } .theme-preview.solid.t75 { background: #2A2A35; } .theme-preview.solid.t76 { background: #F7E7CE; } .theme-preview.solid.t77 { background: #F5F5DC; } .theme-preview.solid.t78 { background: #FAF0E6; } .theme-preview.solid.t79 { background: #FFF8DC; } .theme-preview.solid.t80 { background: #FFE4C4; } .theme-preview.solid.t81 { background: #F5DEB3; } .theme-preview.solid.t82 { background: #FFFACD; } .theme-preview.solid.t83 { background: #F0E68C; } .theme-preview.solid.t84 { background: #EEDD82; } .theme-preview.solid.t85 { background: #D2B48C; } .theme-preview.solid.t86 { background: #DEB887; } .theme-preview.solid.t87 { background: #F5F5F5; } .theme-preview.solid.t88 { background: #E8E4C9; } .theme-preview.solid.t89 { background: #E3DAC9; } .theme-preview.solid.t90 { background: #EADDCD; } .theme-preview.solid.t91 { background: #F2E3C6; } .theme-preview.solid.t92 { background: #E6D6B8; } .theme-preview.solid.t93 { background: #D9C5A0; } .theme-preview.solid.t94 { background: #CFC291; } .theme-preview.solid.t95 { background: #E8E0D5; } .theme-preview.solid.t96 { background: #F3E5AB; } .theme-preview.solid.t97 { background: #F4E2C6; } .theme-preview.solid.t98 { background: #EFE4D1; } .theme-preview.solid.t99 { background: #EAD8C3; } .theme-preview.solid.t100 { background: #E6DFD3; }
-
-/* ІКОНКИ ПРЕВ'Ю ТЕМ */
 .theme-preview { width: 18px; height: 18px; border-radius: 50%; display: inline-block; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.4); box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
 body.light-text .theme-preview { border-color: rgba(0, 0, 0, 0.2); }
-
-/* ================= БАЗОВІ КЛАСИ (GLASSMORPHISM) ================= */
 .glass-panel { border-radius: 24px; transition: all 0.3s ease; }
 .glass-input { color: inherit; transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 .glass-btn { color: inherit; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease; }
 .glass-btn:hover:not(:disabled) { transform: translateY(-2px); }
 .glass-btn:active:not(:disabled) { transform: scale(0.95) translateY(0) !important; }
-
-/* ================= ПОЗИЦІОНУВАННЯ ТА БІЧНА ПАНЕЛЬ ================= */
 .main-container { flex-grow: 1; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 60px 20px; box-sizing: border-box; position: relative; z-index: 5; }
 .main-title { margin-bottom: 20px; font-size: 38px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); text-align: center; width: 100%; }
 .layout-wrapper { display: flex; justify-content: center; width: 100%; max-width: 650px; position: relative; }
 .wrapper { display: flex; flex-direction: column; width: 100%; flex: 1; padding: 20px; position: relative; z-index: 10; gap: 15px; }
-
-/* ВНУТРІШНІЙ ФОН */
 .inner-chat-bg { padding: 20px; border-radius: 20px; display: flex; flex-direction: column; gap: 20px; width: 100%; box-sizing: border-box; transition: background 0.3s ease, border 0.3s ease; }
-
-.chat-sidebar { position: absolute; right: calc(100% + 15px); top: 75px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-end; gap: 15px; padding: 0; z-index: 100; max-height: 250px; width: 80px; }
+.chat-sidebar { position: absolute; right: calc(100% + 15px); top: 10px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-end; gap: 15px; padding: 0; z-index: 100; max-height: 250px; width: 80px; }
 .chat-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); padding: 0; outline: none; position: relative; z-index: 101; flex-shrink: 0; }
 .chat-dot:hover { transform: scale(1.2); }
 @keyframes scaleOut { to { transform: scale(0); opacity: 0; } }
@@ -110,14 +98,15 @@ body.light-text .theme-preview { border-color: rgba(0, 0, 0, 0.2); }
 .add-chat-btn { background: none; border: none; color: inherit; cursor: pointer; font-size: 20px; opacity: 0.5; transition: 0.3s; padding: 0; display: flex; align-items: center; justify-content: center; width: 16px; }
 .add-chat-btn:hover { opacity: 1; transform: scale(1.2) rotate(90deg); }
 
+.chat-dot.shared { border-color: rgba(255, 200, 50, 0.8) !important; box-shadow: 0 0 10px rgba(255, 200, 50, 0.4) !important; background: rgba(255, 200, 50, 0.2) !important; }
+body.light-text .chat-dot.shared { background: rgba(255, 200, 50, 0.4) !important; border-color: rgba(255, 200, 50, 0.9) !important; }
+.chat-dot.shared.active, body.light-text .chat-dot.shared.active { background: rgba(255, 200, 50, 0.95) !important; box-shadow: 0 0 15px rgba(255, 200, 50, 0.8) !important; border-color: transparent !important; }
+
 #chatTitle { text-align: center; font-size: 28px; font-weight: 700; color: inherit; margin: 0; padding: 5px 10px; border: none; background: transparent; outline: none; border-radius: 8px; transition: background 0.3s; cursor: text; position: relative; z-index: 10; width: 100%; box-sizing: border-box; }
 #chatTitle:hover, #chatTitle:focus { background: rgba(255,255,255,0.05); }
 
-/* ================= ВЕРХНЯ ПАНЕЛЬ (ВВІД) ================= */
 .top-action-panel { display: flex; flex-direction: column; width: 100%; box-sizing: border-box; position: relative; z-index: 20; transition: all 0.3s ease; }
 .top-action-panel:focus-within { transform: translateY(-2px); }
-
-/* Область вводу повідомлення */
 .chat-input-wrapper { display: flex; flex-direction: column; width: 100%; border-radius: 20px; padding: 10px 14px; box-sizing: border-box; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 .image-previews { display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
 .image-previews:not(:empty) { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid rgba(255, 255, 255, 0.15); }
@@ -128,7 +117,6 @@ body.light-text .theme-preview { border-color: rgba(0, 0, 0, 0.2); }
 .remove-preview:hover { background: #ff4444; transform: scale(1.15); }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.8); } to { opacity: 1; transform: scale(1); } }
 
-/* ВВІД ПОВІДОМЛЕНЬ */
 .input-row { display: flex; align-items: flex-end; width: 100%; gap: 10px; }
 .attach-clip { background: transparent; border: none; font-size: 24px; color: inherit; cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; opacity: 0.7; transition: all 0.2s; border-radius: 50%; margin-bottom: 0px; height: 40px; }
 .attach-clip:hover { opacity: 1; transform: scale(1.1); background: rgba(255, 255, 255, 0.1); }
@@ -136,34 +124,47 @@ textarea#text { flex: 1; background: transparent; border: none; outline: none; c
 textarea#text::placeholder { color: inherit !important; opacity: 0.6 !important; font-size: 16px; } 
 .send-btn { border-radius: 50%; width: 40px; height: 40px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; margin-bottom: 0px; border: none; }
 
-/* ================= СПИСОК ПОВІДОМЛЕНЬ ТА DRAG HANDLE ================= */
 ul#todolist { width: 100%; padding: 0; list-style: none; margin-top: 0; display: flex; flex-direction: column; gap: 15px; transition: opacity 0.3s ease; position: relative; }
 
-/* ЩЕ ЗМЕНШЕНИЙ ПРАВИЙ ВІДСТУП ДЛЯ КНОПОК РЕДАГУВАННЯ/ВИДАЛЕННЯ (Впритул до краю) */
-li { display: flex; justify-content: space-between; align-items: flex-start; padding: 22px 4px 22px 14px; border-radius: 20px; font-size: 16px; position: relative; opacity: 1; box-sizing: border-box; transform-origin: center top; transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease; z-index: 1; min-height: 80px; }
-li.editing { transform: scale(1.02); z-index: 11; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+/* 🟢 ФІКС: will-change: transform дає 60fps при перетягуванні */
+li { display: flex; justify-content: space-between; align-items: flex-start; padding: 22px 4px 22px 14px; border-radius: 20px; font-size: 16px; position: relative; opacity: 1; box-sizing: border-box; transform-origin: center top; transition: background 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease; z-index: 1; min-height: 80px; will-change: transform; }
+li.editing { transform: scale(1.02); z-index: 11; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.3s ease, box-shadow 0.3s ease; }
 
-/* СПЕЦІАЛЬНА КНОПКА ДЛЯ ПЕРЕТЯГУВАННЯ */
 .drag-handle { cursor: grab; padding-right: 12px; opacity: 0.3; font-size: 22px; display: flex; align-items: center; height: 100%; transition: opacity 0.2s ease, transform 0.2s; }
 .drag-handle:hover { opacity: 1; transform: scale(1.1); }
 .is-dragging .drag-handle { cursor: grabbing; opacity: 1; }
 
-/* ОПТИМІЗОВАНИЙ SORTABLE JS (Drag & Drop) */
+body.is-dragging-global li { backdrop-filter: none !important; box-shadow: none !important; }
+
+/* Вигляд повідомлення для друга під час польоту */
+li.remote-ghost { 
+    opacity: 1 !important; 
+    background: var(--drag-bg) !important;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important; 
+    transform: scale(1.02); 
+    pointer-events: none; 
+    z-index: 99999 !important;
+    border-radius: 20px !important;
+}
+body.light-text li.remote-ghost { box-shadow: 0 15px 35px rgba(0,0,0,0.2) !important; }
+
+/* Твій локальний привид */
 .sortable-ghost { opacity: 0.4 !important; background: transparent !important; border: 2px dashed rgba(255, 255, 255, 0.6) !important; box-shadow: none !important; box-sizing: border-box !important; } 
 body.light-text .sortable-ghost { border-color: rgba(0, 0, 0, 0.4) !important; }
 .sortable-ghost * { visibility: hidden !important; }
 
-/* FALLBACK ДЛЯ ІДЕАЛЬНОГО ПЕРЕТЯГУВАННЯ ПО BODY */
 .sortable-fallback, .sortable-drag { 
-    opacity: 1 !important; box-shadow: 0 15px 35px rgba(0,0,0,0.4) !important; z-index: 99999 !important; 
-    cursor: grabbing !important; border-radius: 20px !important; 
-    display: flex !important; box-sizing: border-box !important; 
+    opacity: 1 !important; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5) !important; 
+    z-index: 99999 !important; 
+    cursor: grabbing !important; 
+    border-radius: 20px !important; 
+    display: flex !important; 
+    box-sizing: border-box !important; 
     margin: 0 !important;
+    backdrop-filter: none !important; 
 }
-/* Для солідних тем залишаємо спеціальний колір, для Liquid Glass працюватиме динамічний CSS з blur */
-body:not(.liquid-glass) .sortable-fallback, body:not(.liquid-glass) .sortable-drag {
-    background: var(--drag-bg) !important;
-}
+body:not(.liquid-glass) .sortable-fallback, body:not(.liquid-glass) .sortable-drag { background: var(--drag-bg) !important; }
 
 @keyframes expandIn { 0% { max-height: 0; padding: 0; opacity: 0; transform: translateX(-30px); border-width: 0; margin-top: -15px; overflow: hidden; } 50% { max-height: 250px; padding: 22px 4px 22px 14px; opacity: 0.5; transform: translateX(10px); border-width: 1px; margin-top: 0; overflow: hidden; } 100% { max-height: 800px; padding: 22px 4px 22px 14px; opacity: 1; transform: translateX(0); border-width: 1px; margin-top: 0; overflow: visible; } }
 li.new-item { animation: expandIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
@@ -171,50 +172,22 @@ li.new-item { animation: expandIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forw
 li.deleting { animation: slideOutRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards !important; pointer-events: none; }
 li.collapsing { transition: height 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), padding 0.4s ease, border-width 0.4s ease, margin 0.4s ease !important; overflow: hidden !important; min-height: 0 !important; }
 
-.todo-main { flex: 1; display: flex; flex-direction: column; gap: 10px; word-break: break-word; padding-right: 10px; }
+.todo-main { flex: 1; display: flex; flex-direction: column; gap: 10px; word-break: break-word; padding-right: 10px; position: relative; }
 .todo-content { display: block; width: 100%; padding: 2px 0; white-space: pre-wrap; line-height: 1.5; animation: contentAppear 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; margin: 0; cursor: text; }
 .todo-content.completed { text-decoration: line-through; opacity: 0.6; }
 @keyframes contentAppear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-/* ================= ІДЕАЛЬНА КНОПКА ЗАКРІПЛЕННЯ (PIN) ТА ВИДІЛЕННЯ ================= */
-li.pinned-highlight { 
-    border: 1px solid rgba(255, 200, 50, 0.8) !important; 
-    box-shadow: 0 4px 25px rgba(255, 200, 50, 0.25), inset 0 0 15px rgba(255, 200, 50, 0.15) !important; 
-    background-color: rgba(255, 200, 50, 0.1) !important; /* Жовтуватий відтінок, ідеально для Liquid Glass */
-}
+li.pinned-highlight { border: 1px solid rgba(255, 200, 50, 0.8) !important; box-shadow: 0 4px 25px rgba(255, 200, 50, 0.25), inset 0 0 15px rgba(255, 200, 50, 0.15) !important; background-color: rgba(255, 200, 50, 0.1) !important; }
 body.light-text li.pinned-highlight { background-color: rgba(255, 200, 50, 0.15) !important; }
-
-.pin-btn { 
-    position: absolute; 
-    top: -20px; 
-    right: -20px; 
-    width: 38px !important; 
-    height: 38px !important; 
-    border-radius: 50% !important; 
-    background: var(--drag-bg) !important; 
-    border: 1px solid rgba(255,255,255,0.2) !important; 
-    backdrop-filter: blur(5px); 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 18px; 
-    z-index: 20; 
-    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.4); 
-    padding: 0; 
-    color: inherit;
-    cursor: pointer;
-}
+.pin-btn { position: absolute; top: -20px; right: -20px; width: 38px !important; height: 38px !important; border-radius: 50% !important; background: var(--drag-bg) !important; border: 1px solid rgba(255,255,255,0.2) !important; backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 20; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 12px rgba(0,0,0,0.4); padding: 0; color: inherit; cursor: pointer; }
 .pin-btn:hover { transform: scale(1.15); box-shadow: 0 6px 18px rgba(0,0,0,0.5); }
 .pin-btn.active { background: rgba(245, 175, 25, 0.95) !important; border-color: #f5af19 !important; }
 .pin-btn.active i { color: #fff !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
-/* ФОТО */
 .todo-images { display: flex; flex-wrap: wrap; gap: 10px; width: 100%; }
 .todo-img { width: calc(25% - 7.5px); aspect-ratio: 1; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); height: auto; }
 .todo-img:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 
-/* Кнопки дій (В ПРИТУЛ ДО ПРАВОГО КРАЮ) */
 .todo-actions { display: flex; flex-direction: row; gap: 6px; flex-shrink: 0; align-items: flex-start; margin-right: 0px; }
 .todo-actions button { border-radius: 12px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; border: none; }
 .delete-btn:hover { background: rgba(255, 60, 60, 0.2) !important; color: #ff6666 !important; }
@@ -223,42 +196,32 @@ body.light-text li.pinned-highlight { background-color: rgba(255, 200, 50, 0.15)
 body.light-text .edit-textarea { border-color: rgba(0,0,0,0.3) !important; }
 @keyframes textareaAppear { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-/* ================= TOOLTIPS ТА СПОВІЩЕННЯ ================= */
+li.remote-editing .edit-textarea { background: rgba(255, 200, 50, 0.1) !important; border: 1px dashed rgba(255, 200, 50, 0.8) !important; cursor: not-allowed; box-shadow: inset 0 0 10px rgba(255, 200, 50, 0.2); }
+li.remote-editing .todo-main::before { content: "Partner is typing..."; position: absolute; top: -15px; right: 0; font-size: 12px; color: #f5af19; font-weight: 700; animation: pulseText 1.5s infinite; pointer-events: none; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+@keyframes pulseText { 0% {opacity:0.4;} 50% {opacity:1;} 100% {opacity:0.4;} }
+
 [data-tooltip], [data-tooltip-bottom] { position: relative; z-index: 50; }
 [data-tooltip]::after, [data-tooltip-bottom]::after { position: absolute; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); color: white !important; text-shadow: none !important; padding: 6px 12px; border-radius: 8px; font-size: 13px; font-weight: 500; white-space: normal; width: max-content; max-width: 200px; text-align: center; line-height: 1.3; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10000; box-shadow: 0 4px 10px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
 [data-tooltip]::before, [data-tooltip-bottom]::before { content: ''; position: absolute; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 10000; border-style: solid; }
 [data-tooltip]:hover::after, [data-tooltip-bottom]:hover::after, [data-tooltip]:hover::before, [data-tooltip-bottom]:hover::before { opacity: 1; transition-delay: 0.8s; }
-
-/* Глобальні налаштування для верхніх тултипів */
 [data-tooltip]::after { content: attr(data-tooltip); bottom: calc(100% + 5px); left: 50%; transform: translateX(-50%); }
 [data-tooltip]::before { bottom: calc(100% - 1px); left: 50%; transform: translateX(-50%); border-width: 6px 6px 0; border-color: rgba(0, 0, 0, 0.85) transparent transparent transparent; }
-
-/* ІНДИВІДУАЛЬНІ НАЛАШТУВАННЯ ДЛЯ ПІДКАЗКИ "ПЕРЕТЯГНІТЬ" */
 .drag-handle[data-tooltip]::after { left: 20%; transform: translateX(-40%); bottom: calc(100% + 0px); }
 .drag-handle[data-tooltip]::before { left: 30%; transform: translateX(-50%); bottom: calc(100% - 6px); }
-
 [data-tooltip-bottom]::after { content: attr(data-tooltip-bottom); top: calc(100% + 12px); left: 50%; transform: translateX(-50%); bottom: auto; }
 [data-tooltip-bottom]::before { top: calc(100% + 6px); bottom: auto; left: 50%; transform: translateX(-50%); border-width: 0 6px 6px; border-color: transparent transparent rgba(0, 0, 0, 0.85) transparent; }
 #settingsBtn[data-tooltip-bottom]::after { top: calc(100% + 12px); left: 0; transform: translateX(0); }
 #settingsBtn[data-tooltip-bottom]::before { top: calc(100% + 6px); left: 22px; transform: translateX(-50%); border-width: 0 6px 6px; border-color: transparent transparent rgba(0, 0, 0, 0.85) transparent; }
 
 .toast-indicator { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); padding: 12px 25px; border-radius: 12px; font-weight: 600; font-size: 14px; opacity: 0; transition: top 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 10000; }
-#connectedIndicator { background: rgba(76, 175, 80, 0.9); color: white; } 
-#copiedIndicator { background: rgba(33, 150, 243, 0.9); color: white; } 
-#disconnectedIndicator { background: rgba(244, 67, 54, 0.9); color: white; } 
-#limitIndicator { background: rgba(255, 152, 0, 0.95); color: white; } 
-#actionIndicator { background: rgba(50, 50, 50, 0.95); color: white; border: 1px solid rgba(255,255,255,0.1); } body.light-text #actionIndicator { background: rgba(255, 255, 255, 0.95); color: #000; border: 1px solid rgba(0,0,0,0.1); } 
+#connectedIndicator { background: rgba(76, 175, 80, 0.9); color: white; } #copiedIndicator { background: rgba(33, 150, 243, 0.9); color: white; } #disconnectedIndicator { background: rgba(244, 67, 54, 0.9); color: white; } #limitIndicator { background: rgba(255, 152, 0, 0.95); color: white; } #actionIndicator { background: rgba(50, 50, 50, 0.95); color: white; border: 1px solid rgba(255,255,255,0.1); } body.light-text #actionIndicator { background: rgba(255, 255, 255, 0.95); color: #000; border: 1px solid rgba(0,0,0,0.1); } 
 #pinIndicator { background: rgba(245, 175, 25, 0.95); color: white; border: 1px solid rgba(255, 255, 255, 0.2); text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
 
-/* ================= НАЛАШТУВАННЯ ТА МЕНЮ ================= */
 .settings-menu-container { position: fixed; top: 20px; left: 20px; z-index: 3000; }
 .settings-btn { border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 26px; padding: 0; position: relative; z-index: 3010; border: none; }
-
 .settings-dropdown { position: absolute; top: 100%; left: 0; margin-top: 10px; border-radius: 16px; padding: 15px; display: flex !important; flex-direction: column; gap: 8px; min-width: 250px; z-index: 3005; transform-origin: top left; visibility: hidden; opacity: 0; pointer-events: none; transform: translateY(-15px) scale(0.95); transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.3s; }
 .settings-dropdown.active { visibility: visible; opacity: 1; pointer-events: auto; transform: translateY(0) scale(1); transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0s; }
-
 .language-btn { width: 100%; display: flex; justify-content: flex-start; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 12px; font-size: 15px; font-weight: 600; border: none; transition: background 0.2s, transform 0.2s; }
-
 .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
 .toggle-switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.3); transition: .4s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 34px; border: 1px solid rgba(255,255,255,0.1); }
@@ -267,7 +230,6 @@ input:checked + .slider { background-color: #4CAF50; border-color: #4CAF50; } in
 
 .solid-dropdown { position: absolute; top: 100%; left: 270px; margin-top: 10px; border-radius: 16px; display: flex !important; flex-direction: column; min-width: 240px; max-height: 350px; overflow: hidden; z-index: 3020; transform-origin: left top; visibility: hidden; opacity: 0; pointer-events: none; transform: translateX(-15px) scale(0.95); transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0.3s; }
 .solid-dropdown.active { visibility: visible; opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); transition: opacity 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), visibility 0s; }
-
 .language-search-container { padding: 12px 15px; border-bottom: 1px solid rgba(0,0,0,0.05); }
 .language-search { width: 100%; padding: 10px 14px; border-radius: 10px; font-size: 14px; border: 1px solid rgba(0,0,0,0.1); outline: none; transition: 0.2s; box-sizing: border-box; font-weight: 500; }
 .language-list, .theme-list { max-height: 280px; overflow-y: auto; overflow-x: hidden; padding: 8px; flex: 1; }
@@ -275,14 +237,12 @@ input:checked + .slider { background-color: #4CAF50; border-color: #4CAF50; } in
 .language-list button:hover, .theme-list button:hover { background: rgba(0,0,0,0.05); }
 .language-list button.selected, .theme-list button.selected { background: rgba(0,0,0,0.1); font-weight: 700; }
 
-/* ================= МОДАЛЬНІ ВІКНА (ТІЛЬКИ ФОТО) ================= */
 .image-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 99999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .image-modal.open { opacity: 1; pointer-events: auto; }
 .modal-close { position: absolute; top: 25px; right: 25px; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 100000; border: none; }
 .image-modal img { max-width: 90vw; max-height: 85vh; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); object-fit: contain; transform: scale(0.8); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 .image-modal.open img { transform: scale(1); }
 
-/* Елементи Спільного доступу */
 .id-container, .connect-container { display: flex; flex-direction: column; gap: 8px; }
 .id-container label, .connect-container label { font-weight: 600; font-size: 14px; opacity: 0.9; margin-left: 5px; }
 .id-display { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-radius: 12px; }
@@ -294,35 +254,33 @@ input:checked + .slider { background-color: #4CAF50; border-color: #4CAF50; } in
 .connect-btn, .disconnect-btn { border-radius: 12px; padding: 0; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
 .connect-btn:disabled, .disconnect-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
-/* ==================== АДАПТАЦІЯ ДЛЯ ТЕЛЕФОНІВ ==================== */
+.overlay-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(5px); }
+.overlay-modal.active { opacity: 1; pointer-events: auto; }
+.modal-content { padding: 25px; min-width: 280px; max-width: 90%; text-align: center; transform: translateY(-20px); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 24px; }
+.overlay-modal.active .modal-content { transform: translateY(0); }
+.action-btn { padding: 14px 16px; border-radius: 16px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; border: 1px solid rgba(255,255,255,0.2); }
+
 @media (max-width: 768px) { 
     .main-container { padding: 80px 10px 40px 10px; } 
     .layout-wrapper { flex-direction: column; align-items: center; width: 100%; position: static; }
     .chat-sidebar { position: static; flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; width: 100%; max-height: none; padding: 10px 15px 20px; }
     .chat-dot { flex-shrink: 0; }
     .main-title { font-size: 30px; margin-bottom: 5px; }
-    
     .settings-menu-container { top: 15px; left: 15px; }
     .settings-btn { width: 38px; height: 38px; font-size: 22px; z-index: 3000; }
-    
     .settings-dropdown { position: fixed !important; top: 60px !important; left: 15px !important; bottom: auto !important; margin: 0 !important; width: auto !important; min-width: 220px !important; max-width: 85vw !important; border-radius: 16px !important; padding: 12px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important; z-index: 3005; transform: translateY(-10px) scale(0.95) !important; gap: 5px !important; }
     .settings-dropdown.active { transform: translateY(0) scale(1) !important; }
-    
     .solid-dropdown { position: fixed !important; top: 70px !important; left: 45px !important; bottom: auto !important; margin: 0 !important; width: auto !important; min-width: 220px !important; max-width: 85vw !important; border-radius: 16px !important; padding: 12px !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important; z-index: 3010; transform: translateX(-10px) scale(0.95) !important; }
     .solid-dropdown.active { transform: translateX(0) scale(1) !important; }
-    
     .language-btn { padding: 10px 12px; font-size: 14px; border-radius: 10px; margin-bottom: 2px;}
     .language-search-container { padding: 8px 10px; } .language-search { padding: 6px 10px; font-size: 13px; border-radius: 8px; }
     .language-list, .theme-list { max-height: 250px; padding: 4px; } .language-list button, .theme-list button { padding: 8px 10px; font-size: 13px; gap: 10px; border-radius: 6px; margin-bottom: 2px;}
-
     .wrapper { width: 100%; gap: 10px; padding: 15px; }
     .inner-chat-bg { padding: 15px 10px; border-radius: 16px; gap: 15px;}
     #chatTitle { font-size: 22px; margin-bottom: 5px; }
-    
     .attach-clip { font-size: 22px; padding: 5px; }
     .send-btn { width: 36px; height: 36px; font-size: 18px; }
     .preview-box { width: 40px; height: 40px; }
-    
     li { padding: 18px 4px 18px 10px; font-size: 15px; border-radius: 16px; }
     .todo-img { width: calc(25% - 7.5px); aspect-ratio: 1; }
     .todo-actions button { width: 34px; height: 34px; font-size: 16px; }
