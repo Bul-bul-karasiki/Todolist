@@ -23,7 +23,7 @@ let globalToastZIndex = 4000;
 let pendingImages = [];
 let sortableInstance = null; 
 
-// ==================== МАСИВ МАТОВИХ ТЕМ ====================
+// ==================== МАСИВ МАТОВИХ ТЕМ (Кольори) ====================
 const solidThemesColors = {
     'theme-51': '#1A2421', 'theme-52': '#24332D', 'theme-53': '#1B262C', 'theme-54': '#0F172A', 'theme-55': '#2E1F27', 'theme-56': '#3E2723', 'theme-57': '#1B1B1B', 'theme-58': '#2F4F4F', 'theme-59': '#4A4036', 'theme-60': '#36454F', 'theme-61': '#2C3539', 'theme-62': '#343434', 'theme-63': '#28282B', 'theme-64': '#3D2B1F', 'theme-65': '#4B3621', 'theme-66': '#191C20', 'theme-67': '#232B2B', 'theme-68': '#353839', 'theme-69': '#252850', 'theme-70': '#123524', 'theme-71': '#1A1110', 'theme-72': '#212121', 'theme-73': '#2C2C2B', 'theme-74': '#181A18', 'theme-75': '#2A2A35',
     'theme-76': '#F7E7CE', 'theme-77': '#F5F5DC', 'theme-78': '#FAF0E6', 'theme-79': '#FFF8DC', 'theme-80': '#FFE4C4', 'theme-81': '#F5DEB3', 'theme-82': '#FFFACD', 'theme-83': '#F0E68C', 'theme-84': '#EEDD82', 'theme-85': '#D2B48C', 'theme-86': '#DEB887', 'theme-87': '#F5F5F5', 'theme-88': '#E8E4C9', 'theme-89': '#E3DAC9', 'theme-90': '#EADDCD', 'theme-91': '#F2E3C6', 'theme-92': '#E6D6B8', 'theme-93': '#D9C5A0', 'theme-94': '#CFC291', 'theme-95': '#E8E0D5', 'theme-96': '#F3E5AB', 'theme-97': '#F4E2C6', 'theme-98': '#EFE4D1', 'theme-99': '#EAD8C3', 'theme-100': '#E6DFD3'
@@ -404,31 +404,27 @@ function reorderListElements(listElement) {
     unpinned.forEach(item => listElement.appendChild(item));
 }
 
-let lastSentIndex = -1; // 🟢 ФІКС ЛАГІВ МЕРЕЖІ: Зберігаємо останній надісланий індекс
+let lastDragMoveTime = 0;
 function initSortable() {
     const list = document.getElementById('todolist'); if (!list) return;
     if (sortableInstance) sortableInstance.destroy();
     
     sortableInstance = new Sortable(list, {
-        handle: '.drag-handle', 
-        animation: 150, 
-        easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
+        handle: '.drag-handle', animation: 150, easing: "cubic-bezier(0.25, 1, 0.5, 1)", 
         ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen', dragClass: 'sortable-drag', fallbackClass: 'sortable-fallback',
-        forceFallback: true, fallbackOnBody: true, axis: 'y', 
-        scroll: true, bubbleScroll: true, scrollSensitivity: 200, scrollSpeed: 25,
-        fallbackTolerance: 5, // 🟢 ФІКС МІКРО-КЛІКІВ: Запобігає випадковому старту Drag-n-Drop
-        delay: 50, delayOnTouchOnly: true, // 🟢 ФІКС ДЛЯ ТЕЛЕФОНІВ: Дозволяє нормально скролити
-        
+        forceFallback: true, fallbackOnBody: true, axis: 'y', scroll: true, bubbleScroll: true, scrollSensitivity: 200, scrollSpeed: 25,
         onStart: function (evt) { 
             list.classList.add('is-dragging'); document.body.classList.add('is-dragging-global'); 
-            lastSentIndex = evt.oldIndex;
             peerManager.sendAction('DRAG_START', { id: evt.item.id });
         },
         onChange: function(evt) {
-            // 🟢 ФІКС ЛАГІВ МЕРЕЖІ: Відправляємо тільки якщо елемент реально перестрибнув на нове місце
-            if (evt.newIndex !== lastSentIndex && evt.newIndex !== undefined) { 
-                lastSentIndex = evt.newIndex;
-                peerManager.sendAction('DRAG_MOVE', { id: evt.item.id, newIndex: evt.newIndex });
+            const now = Date.now();
+            // Змінено з 100мс на 40мс для плавного перетягування по мережі без ривків
+            if (now - lastDragMoveTime > 40) { 
+                lastDragMoveTime = now;
+                setTimeout(() => {
+                    peerManager.sendAction('DRAG_MOVE', { id: evt.item.id, newIndex: evt.newIndex });
+                }, 0);
             }
         },
         onEnd: function (evt) { 
@@ -779,19 +775,16 @@ const peerManager = {
                         if (list && itemToMove) {
                             itemToMove.classList.add('remote-ghost');
                             
-                            // 🟢 ФІКС: Оптимізація DOM. Рухаємо тільки якщо він реально на іншому місці!
+                            // Просто міняємо елементи місцями в DOM без складної FLIP математики, 
+                            // яка конфліктувала з мережею і робила фризи
                             const children = Array.from(list.children);
-                            const currentIndex = children.indexOf(itemToMove);
-                            
-                            if (currentIndex !== p.newIndex && p.newIndex !== -1) {
-                                if (p.newIndex >= children.length) { 
-                                    list.appendChild(itemToMove); 
-                                } else { 
-                                    const targetElement = children[p.newIndex]; 
-                                    if(targetElement && targetElement !== itemToMove) { 
-                                        list.insertBefore(itemToMove, p.newIndex > currentIndex ? targetElement.nextSibling : targetElement); 
-                                    } 
-                                }
+                            if (p.newIndex >= children.length) { 
+                                list.appendChild(itemToMove); 
+                            } else { 
+                                const targetElement = children[p.newIndex]; 
+                                if(targetElement !== itemToMove) { 
+                                    list.insertBefore(itemToMove, p.newIndex > children.indexOf(itemToMove) ? targetElement.nextSibling : targetElement); 
+                                } 
                             }
                         }
                         break;
@@ -819,28 +812,26 @@ const peerManager = {
         if (this.conn && this.conn.open && this.sharedChatId === activeChatId) {
             this.conn.send({ type: 'SYNC_ACTION', action: actionName, chatId: activeChatId, payload: payloadObj });
         }
+    },
+    
+    updateConnectionButtons(isConnected) {
+        const connectBtn = document.getElementById("connectBtn"); const disconnectBtn = document.getElementById("disconnectBtn"); const friendIdInput = document.getElementById("friendIdInput");
+        if (connectBtn) connectBtn.disabled = isConnected; if (disconnectBtn) disconnectBtn.disabled = !isConnected; if (friendIdInput) friendIdInput.disabled = isConnected;
+    },
+    
+    copyMyId() {
+        const myPeerIdEl = document.getElementById("myPeerId"); if (!myPeerIdEl) return;
+        const myId = myPeerIdEl.textContent; if (myId === "Loading..." || myId.includes("Error")) return;
+        navigator.clipboard.writeText(myId).then(() => { this.showInd("copiedIndicator"); });
+    },
+    
+    showInd(id, text) {
+        const el = document.getElementById(id); if (!el) return;
+        if (text) el.innerHTML = text;
+        if (el.timeoutId) clearTimeout(el.timeoutId);
+        globalToastZIndex++; el.style.zIndex = globalToastZIndex; el.style.top = "20px"; el.style.opacity = "1";
+        el.timeoutId = setTimeout(() => { el.style.top = "-60px"; el.style.opacity = "0"; }, 2500);
     }
-    // ... інші методи (без змін)
-};
-
-// Продовження ініціалізації
-peerManager.updateConnectionButtons = function(isConnected) {
-    const connectBtn = document.getElementById("connectBtn"); const disconnectBtn = document.getElementById("disconnectBtn"); const friendIdInput = document.getElementById("friendIdInput");
-    if (connectBtn) connectBtn.disabled = isConnected; if (disconnectBtn) disconnectBtn.disabled = !isConnected; if (friendIdInput) friendIdInput.disabled = isConnected;
-};
-
-peerManager.copyMyId = function() {
-    const myPeerIdEl = document.getElementById("myPeerId"); if (!myPeerIdEl) return;
-    const myId = myPeerIdEl.textContent; if (myId === "Loading..." || myId.includes("Error")) return;
-    navigator.clipboard.writeText(myId).then(() => { this.showInd("copiedIndicator"); });
-};
-
-peerManager.showInd = function(id, text) {
-    const el = document.getElementById(id); if (!el) return;
-    if (text) el.innerHTML = text;
-    if (el.timeoutId) clearTimeout(el.timeoutId);
-    globalToastZIndex++; el.style.zIndex = globalToastZIndex; el.style.top = "20px"; el.style.opacity = "1";
-    el.timeoutId = setTimeout(() => { el.style.top = "-60px"; el.style.opacity = "0"; }, 2500);
 };
 
 window.addEventListener("load", function() {
